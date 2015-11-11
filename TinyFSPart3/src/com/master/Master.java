@@ -10,6 +10,7 @@ import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.Set;
 
+import com.client.FileHandle;
 import com.interfaces.MasterInterface;
 
 public class Master implements MasterInterface
@@ -109,8 +110,58 @@ public class Master implements MasterInterface
 		Master master = new Master();
 		master.ReadMetadata();
 	}
-	
-	public String createChunk() {
+
+	@Override
+	public String CreateChunk() {
+		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public int CreateDir(String src, String dirname) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public int DeleteDir(String src, String dirname) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public int RenameDir(String src, String NewName) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public String[] ListDir(String tgt) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public int CreateFile(String tgtdir, String filename) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public int DeleteFile(String tgtdir, String filename) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public int OpenFile(String FilePath, FileHandle ofh) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public int CloseFile(FileHandle ofh) {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 }
