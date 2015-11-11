@@ -1,13 +1,16 @@
 package com.client;
 
-import java.io.File;
-import java.util.Arrays;
-
 public class FileHandle {
 	final static String filePath = "csci485/";
 	String directory;
 	String filename;
 	String handle;
+	
+	public FileHandle() {
+		directory = null;
+		filename = null;
+		handle = null;
+	}
 	
 	public FileHandle(String tgtdir, String fn) {
 		directory = tgtdir;
