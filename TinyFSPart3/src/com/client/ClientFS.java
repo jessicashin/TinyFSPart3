@@ -19,6 +19,11 @@ public class ClientFS {
 		Success, //Returned when a method succeeds
 		Fail //Returned when a method fails
 	}
+	private Master m=null;
+	
+	public ClientFS() {
+		m = new Master();
+	}
 
 	/**
 	 * Creates the specified dirname in the src directory Returns
@@ -29,17 +34,18 @@ public class ClientFS {
 	 * "CSCI485"), CreateDir("/Shahram/CSCI485", "Lecture1")
 	 */
 	public FSReturnVals CreateDir(String src, String dirname) {
-		switch(Master.CreateDir(src, dirname)) {
-		case FSReturnVals.Success:
-			return FSReturnVals.Success;
-		case FSReturnVals.SrcDirNotExistent:
-			return FSReturnVals.SrcDirNotExistent;
-		case FSReturnVals.DestDirExists:
-			return FSReturnVals.DestDirExists;
-		default:
-			return FSReturnVals.Fail;
+		switch(m.CreateDir(src, dirname)) {
+			case 12:
+				return FSReturnVals.Success;
+			case 13:
+				return FSReturnVals.Fail;
+			case 3:
+				return FSReturnVals.SrcDirNotExistent;
+			case 1:
+				return FSReturnVals.DirExists;
+			default:
+				return FSReturnVals.Fail;
 		}
-		return null;
 	}
 
 	/**
@@ -50,17 +56,18 @@ public class ClientFS {
 	 * Example usage: DeleteDir("/Shahram/CSCI485", "Lecture1")
 	 */
 	public FSReturnVals DeleteDir(String src, String dirname) {
-		switch(Master.DeleteDir(src, dirname)) {
-		case FSReturnVals.Success:
-			return FSReturnVals.Success;
-		case FSReturnVals.SrcDirNotExistent:
-			return FSReturnVals.SrcDirNotExistent;
-		case FSReturnVals.DirNotEmpty:
-			return FSReturnVals.DirNotEmpty;
-		default:
-			return FSReturnVals.Fail;
+		switch(m.DeleteDir(src, dirname)) {
+			case 12:
+				return FSReturnVals.Success;
+			case 13:
+				return FSReturnVals.Fail;
+			case 3:
+				return FSReturnVals.SrcDirNotExistent;
+			case 2:
+				return FSReturnVals.DirNotEmpty;
+			default:
+				return FSReturnVals.Fail;
 		}
-		return null;
 	}
 
 	/**
@@ -73,17 +80,18 @@ public class ClientFS {
 	 */
 	//pass to master
 	public FSReturnVals RenameDir(String src, String NewName) {
-		switch(Master.RenameDir(src, NewName)) {
-		case FSReturnVals.Success:
-			return FSReturnVals.Success;
-		case FSReturnVals.SrcDirNotExistent:
-			return FSReturnVals.SrcDirNotExistent;
-		case FSReturnVals.DestDirExists:
-			return FSReturnVals.DestDirExists;
-		default:
-			return FSReturnVals.Fail;
+		switch(m.RenameDir(src, NewName)) {
+			case 12:
+				return FSReturnVals.Success;
+			case 13:
+				return FSReturnVals.Fail;
+			case 3:
+				return FSReturnVals.SrcDirNotExistent;
+			case 4:
+				return FSReturnVals.DestDirExists;
+			default:
+				return FSReturnVals.Fail;
 		}
-		return null;
 	}
 
 	/**
@@ -97,9 +105,9 @@ public class ClientFS {
 	 */
 	//pass to master
 	public String[] ListDir(String tgt) {
-		String[]  targetDirContent = Master.ListDir(tgt);
+		String[]  targetDirContent = m.ListDir(tgt);
 		//if(targetDirContent[0].equals(FSReturnVals.SrcDirNotExistent)) { return FSReturnVals.SrcDirNotExistent; }
-		if(targetDirContent[0].equals(FSReturnVals.SrcDirNotExistent)) { return targetDirContent; }
+		if(targetDirContent[0].equals(3)) { return targetDirContent; }
 		if(targetDirContent.length == 0) { return null; }
 		return targetDirContent;
 	}
@@ -112,17 +120,18 @@ public class ClientFS {
 	 * Example usage: Createfile("/Shahram/CSCI485/Lecture1", "Intro.pptx")
 	 */
 	public FSReturnVals CreateFile(String tgtdir, String filename) {
-		switch(Master.CreateFile(tgtdir, filename)) {
-		case FSReturnVals.Success:
-			return FSReturnVals.Success;
-		case FSReturnVals.SrcDirNotExistent:
-			return FSReturnVals.SrcDirNotExistent;
-		case FSReturnVals.FileExists:
-			return FSReturnVals.FileExists;
-		default:
-			return FSReturnVals.Fail;
+		switch(m.CreateFile(tgtdir, filename)) {
+			case 12:
+				return FSReturnVals.Success;
+			case 13:
+				return FSReturnVals.Fail;
+			case 3:
+				return FSReturnVals.SrcDirNotExistent;
+			case 5:
+				return FSReturnVals.FileExists;
+			default:
+				return FSReturnVals.Fail;
 		}
-		return null;
 	}
 
 	/**
@@ -133,17 +142,18 @@ public class ClientFS {
 	 * Example usage: DeleteFile("/Shahram/CSCI485/Lecture1", "Intro.pptx")
 	 */
 	public FSReturnVals DeleteFile(String tgtdir, String filename) {
-		switch(Master.RenameDir(tgtdir, filename)) {
-		case FSReturnVals.Success:
-			return FSReturnVals.Success;
-		case FSReturnVals.SrcDirNotExistent:
-			return FSReturnVals.SrcDirNotExistent;
-		case FSReturnVals.FileDoesNotExist:
-			return FSReturnVals.FileDoesNotExist;
-		default:
-			return FSReturnVals.Fail;
+		switch(m.RenameDir(tgtdir, filename)) {
+			case 12:
+				return FSReturnVals.Success;
+			case 13:
+				return FSReturnVals.Fail;
+			case 3:
+				return FSReturnVals.SrcDirNotExistent;
+			case 6:
+				return FSReturnVals.FileDoesNotExist;
+			default:
+				return FSReturnVals.Fail;
 		}
-		return null;
 	}
 
 	/**
@@ -153,15 +163,16 @@ public class ClientFS {
 	 * Example usage: OpenFile("/Shahram/CSCI485/Lecture1/Intro.pptx")
 	 */
 	public FSReturnVals OpenFile(String FilePath, FileHandle ofh) {
-		switch(Master.OpenFile(FilePath, ofh)) {
-		case FSReturnVals.Success:
-			return FSReturnVals.Success;
-		case FSReturnVals.FileDoesNotExist:
-			return FSReturnVals.FileDoesNotExist;
-		default:
-			return FSReturnVals.Fail;
+		switch(m.OpenFile(FilePath, ofh)) {
+			case 12:
+				return FSReturnVals.Success;
+			case 13:
+				return FSReturnVals.Fail;
+			case 6:
+				return FSReturnVals.FileDoesNotExist;
+			default:
+				return FSReturnVals.Fail;
 		}
-		return null;
 	}
 
 	/**
@@ -171,15 +182,16 @@ public class ClientFS {
 	 * Example usage: CloseFile(FH1)
 	 */
 	public FSReturnVals CloseFile(FileHandle ofh) {
-		switch(Master.CloseFile(ofh)) {
-		case FSReturnVals.Success:
-			return FSReturnVals.Success;
-		case FSReturnVals.BadHandle:
-			return FSReturnVals.BadHandle;
-		default:
-			return FSReturnVals.Fail;
+		switch(m.CloseFile(ofh)) {
+			case 12:
+				return FSReturnVals.Success;
+			case 13:
+				return FSReturnVals.Fail;
+			case 7:
+				return FSReturnVals.BadHandle;
+			default:
+				return FSReturnVals.Fail;
 		}
-		return null;
 	}
 
 }
