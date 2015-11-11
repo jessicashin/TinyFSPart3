@@ -131,7 +131,7 @@ public class ClientFS {
 	 * Example usage: DeleteFile("/Shahram/CSCI485/Lecture1", "Intro.pptx")
 	 */
 	public FSReturnVals DeleteFile(String tgtdir, String filename) {
-		return TranslateMasterRetVal(m.RenameDir(tgtdir, filename));
+		return TranslateMasterRetVal(m.DeleteFile(tgtdir, filename));
 	}
 
 	/**
