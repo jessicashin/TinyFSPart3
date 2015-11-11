@@ -15,6 +15,7 @@ import java.util.Arrays;
 
 import com.client.Client;
 import com.interfaces.ChunkServerInterface;
+import com.network.Network;
 
 /**
  * implementation of interfaces at the chunkserver side
@@ -142,10 +143,10 @@ public class ChunkServer implements ChunkServerInterface {
 				
 				//Use the existing input and output stream as long as the client is connected
 				while (!ClientConnection.isClosed()) {
-					int payloadsize =  Client.ReadIntFromInputStream("ChunkServer", ReadInput);
+					int payloadsize =  Network.ReadIntFromInputStream("ChunkServer", ReadInput);
 					if (payloadsize == -1) 
 						break;
-					int CMD = Client.ReadIntFromInputStream("ChunkServer", ReadInput);
+					int CMD = Network.ReadIntFromInputStream("ChunkServer", ReadInput);
 					switch (CMD){
 					case CreateChunkCMD:
 						String chunkhandle = cs.createChunk();
@@ -156,12 +157,12 @@ public class ChunkServer implements ChunkServerInterface {
 						break;
 
 					case ReadChunkCMD:
-						int offset =  Client.ReadIntFromInputStream("ChunkServer", ReadInput);
-						int payloadlength =  Client.ReadIntFromInputStream("ChunkServer", ReadInput);
+						int offset =  Network.ReadIntFromInputStream("ChunkServer", ReadInput);
+						int payloadlength =  Network.ReadIntFromInputStream("ChunkServer", ReadInput);
 						int chunkhandlesize = payloadsize - ChunkServer.PayloadSZ - ChunkServer.CMDlength - (2 * 4);
 						if (chunkhandlesize < 0)
 							System.out.println("Error in ChunkServer.java, ReadChunkCMD has wrong size.");
-						byte[] CHinBytes = Client.RecvPayload("ChunkServer", ReadInput, chunkhandlesize);
+						byte[] CHinBytes = Network.RecvPayload("ChunkServer", ReadInput, chunkhandlesize);
 						String ChunkHandle = (new String(CHinBytes)).toString();
 						
 						byte[] res = cs.readChunk(ChunkHandle, offset, payloadlength);
@@ -176,13 +177,13 @@ public class ChunkServer implements ChunkServerInterface {
 						break;
 
 					case WriteChunkCMD:
-						offset =  Client.ReadIntFromInputStream("ChunkServer", ReadInput);
-						payloadlength =  Client.ReadIntFromInputStream("ChunkServer", ReadInput);
-						byte[] payload = Client.RecvPayload("ChunkServer", ReadInput, payloadlength);
+						offset =  Network.ReadIntFromInputStream("ChunkServer", ReadInput);
+						payloadlength =  Network.ReadIntFromInputStream("ChunkServer", ReadInput);
+						byte[] payload = Network.RecvPayload("ChunkServer", ReadInput, payloadlength);
 						chunkhandlesize = payloadsize - ChunkServer.PayloadSZ - ChunkServer.CMDlength - (2 * 4) - payloadlength;
 						if (chunkhandlesize < 0)
 							System.out.println("Error in ChunkServer.java, WritehChunkCMD has wrong size.");
-						CHinBytes = Client.RecvPayload("ChunkServer", ReadInput, chunkhandlesize);
+						CHinBytes = Network.RecvPayload("ChunkServer", ReadInput, chunkhandlesize);
 						ChunkHandle = (new String(CHinBytes)).toString();
 
 						//Call the writeChunk command

@@ -19,10 +19,19 @@ public interface MasterInterface {
 	public static final int	Success				= 12; //Returned when a method succeeds
 	public static final int	Fail				= 13; //Returned when a method fails
 	
-	/**
-	 * Return the chunkhandle for a newly created chunk.
-	 */
-	public String CreateChunk();
+	// Networking Communication Constants
+	public static final int ReqCreateDir		= 101;
+	public static final int ReqDeleteDir		= 102;
+	public static final int ReqRenameDir		= 103;
+	public static final int ReqListDir			= 104;
+	public static final int ReqCreateFile		= 105;
+	public static final int ReqDeleteFile		= 106;
+	public static final int ReqOpenFile			= 107;
+	public static final int ReqCloseFile		= 108;
+	
+	// Master Location
+	public static final String MasterIpAddr = "127.0.0.1";
+	public static final int MasterPort = 3469;
 	
 	/**
 	 * Creates the specified dirname in the src directory Returns

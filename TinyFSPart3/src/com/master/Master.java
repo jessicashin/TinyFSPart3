@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.ServerSocket;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -26,10 +27,14 @@ public class Master implements MasterInterface
 	
 	public Master()
 	{
-		namespace.put("/", new LinkedList<String>());
+		ReadMetadata();
+		if (namespace.get("/") == null)
+		{
+			namespace.put("/", new LinkedList<String>());
+		}
 	}
 	
-	void WriteStrHashTable(String file, Hashtable<String, LinkedList<String>> table)
+	private synchronized void WriteStrHashTable(String file, Hashtable<String, LinkedList<String>> table)
 	{
 		try {
 			PrintWriter outWrite = new PrintWriter(new FileOutputStream(file));
@@ -62,7 +67,7 @@ public class Master implements MasterInterface
 		}
 	}
 	
-	void ReadStrHashTable(String file, Hashtable<String, LinkedList<String>> table)
+	private synchronized void ReadStrHashTable(String file, Hashtable<String, LinkedList<String>> table)
 	{
 		try {
 			BufferedReader binput = new BufferedReader(new FileReader(file));
@@ -98,32 +103,21 @@ public class Master implements MasterInterface
 		}
 	}
 	
-	void WriteMetadata()
+	private synchronized void WriteMetadata()
 	{
 		// Brute force write of all metadata.		
 		WriteStrHashTable(NamespaceFile, namespace);
 		WriteStrHashTable(FileChunksFile, files);
 	}
 	
-	void ReadMetadata()
+	private synchronized void ReadMetadata()
 	{
 		// Read all of the metadata.
 		ReadStrHashTable(NamespaceFile, namespace);
 		ReadStrHashTable(FileChunksFile, files);
 	}
 	
-	public static void main(String args[])
-	{
-		//Master master = new Master();
-		//master.ReadMetadata();
-	}
-	
-	public String CreateChunk() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	
-	public int CreateDir(String src, String dirname)
+	public synchronized int CreateDir(String src, String dirname)
 	{
 		src = SanitizeStr(src);
 		
@@ -146,7 +140,7 @@ public class Master implements MasterInterface
 		return Success;
 	}
 
-	public int DeleteDir(String src, String dirname)
+	public synchronized int DeleteDir(String src, String dirname)
 	{
 		src = SanitizeStr(src);
 		
@@ -176,7 +170,7 @@ public class Master implements MasterInterface
 		return Success;
 	}
 
-	public int RenameDir(String src, String NewName)
+	public synchronized int RenameDir(String src, String NewName)
 	{
 		src = SanitizeStr(src);
 		NewName = SanitizeStr(NewName);
@@ -233,7 +227,7 @@ public class Master implements MasterInterface
 		return Success;
 	}
 
-	public String[] ListDir(String tgt)
+	public synchronized String[] ListDir(String tgt)
 	{
 		ArrayList<String> retVal = ListDirRecursive(tgt);
 		
@@ -245,7 +239,7 @@ public class Master implements MasterInterface
 		return retVal.toArray(new String[retVal.size()]);
 	}
 	
-	private ArrayList<String> ListDirRecursive(String tgt)
+	private synchronized ArrayList<String> ListDirRecursive(String tgt)
 	{
 		tgt = SanitizeStr(tgt);
 		
@@ -281,7 +275,7 @@ public class Master implements MasterInterface
 		return retVal;
 	}
 
-	public int CreateFile(String tgtdir, String filename)
+	public synchronized int CreateFile(String tgtdir, String filename)
 	{
 		tgtdir = SanitizeStr(tgtdir);
 		
@@ -305,7 +299,7 @@ public class Master implements MasterInterface
 		return Success;
 	}
 
-	public int DeleteFile(String tgtdir, String filename)
+	public synchronized int DeleteFile(String tgtdir, String filename)
 	{
 		tgtdir = SanitizeStr(tgtdir);
 		
@@ -326,17 +320,17 @@ public class Master implements MasterInterface
 		return Success;
 	}
 
-	public int OpenFile(String FilePath, FileHandle ofh)
+	public synchronized int OpenFile(String FilePath, FileHandle ofh)
 	{
 		return 0;
 	}
 
-	public int CloseFile(FileHandle ofh)
+	public synchronized int CloseFile(FileHandle ofh)
 	{
 		return 0;
 	}
 	
-	private String SanitizeStr(String src)
+	private synchronized String SanitizeStr(String src)
 	{
 		if (src != "/" && src.endsWith("/"))
 		{
@@ -344,5 +338,35 @@ public class Master implements MasterInterface
 		}
 		
 		return src;
+	}
+	
+	public static void ReadAndProcessRequests()
+	{
+		Master master = new Master();
+		
+		// Used for communication via the network.
+		ServerSocket socket = null;
+		
+		try {
+			socket = new ServerSocket(MasterPort);
+		} catch (IOException ex) {
+			System.out.println("Error: Failed to open a new socket to listen on.");
+			ex.printStackTrace();
+		}
+		
+		while (true) {
+			try {
+				new MasterThread(master, socket.accept()).start();
+				System.out.println("START: New MasterThread.");
+			} catch (IOException e) {
+				System.out.println("Error: Socket unable to be accepted.");
+				e.printStackTrace();
+			}
+		}
+	}
+
+	public static void main(String args[])
+	{
+		ReadAndProcessRequests();
 	}
 }

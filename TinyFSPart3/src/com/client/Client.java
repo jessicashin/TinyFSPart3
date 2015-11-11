@@ -15,6 +15,7 @@ import java.nio.ByteBuffer;
 
 import com.chunkserver.ChunkServer;
 import com.interfaces.ClientInterface;
+import com.network.Network;
 
 /**
  * implementation of interfaces at the client side
@@ -26,39 +27,6 @@ public class Client implements ClientInterface {
 	static Socket ClientSocket;
 	static ObjectOutputStream WriteOutput;
 	static ObjectInputStream ReadInput;
-	
-	public static byte[] RecvPayload(String caller, ObjectInputStream instream, int sz){
-		byte[] tmpbuf = new byte[sz];
-		byte[] InputBuff = new byte[sz];
-		int ReadBytes = 0;
-		while (ReadBytes != sz){
-			int cntr=-1;
-			try {
-				cntr = instream.read( tmpbuf, 0, (sz-ReadBytes) );
-				for (int j=0; j < cntr; j++){
-					InputBuff[ReadBytes+j]=tmpbuf[j];
-				}
-			} catch (IOException e) {
-				System.out.println("Error in RecvPayload ("+caller+"), failed to read "+sz+" after reading "+ReadBytes+" bytes.");
-				return null;
-			}
-			if (cntr == -1) {
-				System.out.println("Error in RecvPayload ("+caller+"), failed to read "+sz+" bytes.");
-				return null;
-			}
-			else ReadBytes += cntr;
-		}
-		return InputBuff;
-	}
-	
-	public static int ReadIntFromInputStream(String caller, ObjectInputStream instream){
-		int PayloadSize = -1;
-		
-		byte[] InputBuff = RecvPayload(caller, instream, 4);
-		if (InputBuff != null)
-			PayloadSize = ByteBuffer.wrap(InputBuff).getInt();
-		return PayloadSize;
-	}
 	
 	/**
 	 * Initialize the client  FileNotFoundException
@@ -90,9 +58,9 @@ public class Client implements ClientInterface {
 			WriteOutput.writeInt(ChunkServer.CreateChunkCMD);
 			WriteOutput.flush();
 			
-			int ChunkHandleSize =  ReadIntFromInputStream("Client", ReadInput);
+			int ChunkHandleSize =  Network.ReadIntFromInputStream("Client", ReadInput);
 			ChunkHandleSize -= ChunkServer.PayloadSZ;  //reduce the length by the first four bytes that identify the length
-			byte[] CHinBytes = RecvPayload("Client", ReadInput, ChunkHandleSize); 
+			byte[] CHinBytes = Network.RecvPayload("Client", ReadInput, ChunkHandleSize); 
 			return (new String(CHinBytes)).toString();
 		} catch (IOException e) {
 			System.out.println("Error in Client.createChunk:  Failed to create a chunk.");
@@ -120,7 +88,7 @@ public class Client implements ClientInterface {
 			WriteOutput.write(CHinBytes);
 			WriteOutput.flush();
 			
-			int result =  Client.ReadIntFromInputStream("Client", ReadInput);
+			int result =  Network.ReadIntFromInputStream("Client", ReadInput);
 			if (result == ChunkServer.FALSE) return false;
 			return true;
 		} catch (IOException e) {
@@ -148,9 +116,9 @@ public class Client implements ClientInterface {
 			WriteOutput.write(CHinBytes);
 			WriteOutput.flush();
 			
-			int ChunkSize =  Client.ReadIntFromInputStream("Client", ReadInput);
+			int ChunkSize =  Network.ReadIntFromInputStream("Client", ReadInput);
 			ChunkSize -= ChunkServer.PayloadSZ;  //reduce the length by the first four bytes that identify the length
-			byte[] payload = RecvPayload("Client", ReadInput, ChunkSize); 
+			byte[] payload = Network.RecvPayload("Client", ReadInput, ChunkSize); 
 			return payload;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
