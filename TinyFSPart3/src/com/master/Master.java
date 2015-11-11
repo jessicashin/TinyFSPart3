@@ -7,6 +7,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.Set;
@@ -19,8 +20,8 @@ public class Master implements MasterInterface
 	public final static String NamespaceFile = "namespace.txt";
 	public final static String FileChunksFile = "filechunks.txt";
 
-	Hashtable<String, LinkedList<String>> namespace;
-	Hashtable<String, LinkedList<String>> files;
+	private Hashtable<String, LinkedList<String>> namespace = new Hashtable<String, LinkedList<String>>();
+	private Hashtable<String, LinkedList<String>> files = new Hashtable<String, LinkedList<String>>();
 	// TODO: Location of each chunk's replicas.
 	
 	public Master()
@@ -113,8 +114,8 @@ public class Master implements MasterInterface
 	
 	public static void main(String args[])
 	{
-		Master master = new Master();
-		master.ReadMetadata();
+		//Master master = new Master();
+		//master.ReadMetadata();
 	}
 	
 	public String CreateChunk() {
@@ -124,6 +125,8 @@ public class Master implements MasterInterface
 	
 	public int CreateDir(String src, String dirname)
 	{
+		src = SanitizeStr(src);
+		
 		LinkedList<String> vals = namespace.get(src);
 		
 		if (vals == null)
@@ -137,6 +140,7 @@ public class Master implements MasterInterface
 		}
 		
 		vals.add(dirname);
+		if(src == "/") src = "";
 		namespace.put(src + "/" + dirname, new LinkedList<String>());
 		
 		return Success;
@@ -144,6 +148,8 @@ public class Master implements MasterInterface
 
 	public int DeleteDir(String src, String dirname)
 	{
+		src = SanitizeStr(src);
+		
 		LinkedList<String> vals = namespace.get(src);
 		
 		if (vals == null)
@@ -151,19 +157,32 @@ public class Master implements MasterInterface
 			return SrcDirNotExistent;
 		}
 		
-		if (!vals.isEmpty())
+		if (src == "/") src = "";
+		LinkedList<String> dirVals = namespace.get(src + "/" + dirname);
+		
+		if (dirVals == null)
+		{
+			return SrcDirNotExistent;
+		}
+		
+		if (!dirVals.isEmpty())
 		{
 			return DirNotEmpty;
 		}
 		
-		namespace.remove(src);
+		vals.remove(dirname);
+		namespace.remove(src + "/" + dirname);
 		
 		return Success;
 	}
 
 	public int RenameDir(String src, String NewName)
 	{
+		src = SanitizeStr(src);
+		NewName = SanitizeStr(NewName);
+		
 		String parent = src.substring(0, src.lastIndexOf("/"));
+		if (parent.isEmpty()) parent = "/";
 		LinkedList<String> vals = namespace.get(parent);
 		
 		if (vals == null)
@@ -184,23 +203,52 @@ public class Master implements MasterInterface
 			return SrcDirNotExistent;
 		}
 		
-		if (!dirVals.isEmpty())
-		{
-			return DirNotEmpty;
-		}
-		
 		String oldName = src.substring(src.lastIndexOf("/") + 1, src.length());
+		String newName = NewName.substring(NewName.lastIndexOf("/") + 1, NewName.length());
 		vals.remove(oldName);
-		vals.add(NewName);
+		vals.add(newName);
 		
+		LinkedList<String> tempList = new LinkedList<String>();
+		tempList.addAll(namespace.get(src));
 		namespace.remove(src);
-		namespace.put(parent + "/" + NewName, new LinkedList<String>());
+		namespace.put(NewName, tempList);
+		
+		src += "/";
+		NewName += "/";
+		
+		Set<String> keySet = new HashSet<String>();
+		keySet.addAll(namespace.keySet());
+		for(String key : keySet)
+		{
+			if(key.contains(src))
+			{
+				LinkedList<String> list = new LinkedList<String>();
+				list.addAll(namespace.get(key));
+				namespace.remove(key);
+				key.replace(src, NewName);
+				namespace.put(key, list);
+			}
+		}
 		
 		return Success;
 	}
 
 	public String[] ListDir(String tgt)
 	{
+		ArrayList<String> retVal = ListDirRecursive(tgt);
+		
+		if (retVal == null)
+		{
+			return null;
+		}
+		
+		return retVal.toArray(new String[retVal.size()]);
+	}
+	
+	private ArrayList<String> ListDirRecursive(String tgt)
+	{
+		tgt = SanitizeStr(tgt);
+		
 		LinkedList<String> vals = namespace.get(tgt);
 		
 		if (vals == null)
@@ -213,19 +261,30 @@ public class Master implements MasterInterface
 			return null;
 		}
 		
-		ArrayList<String> retVals = new ArrayList<String>();
+		ArrayList<String> retVal = new ArrayList<String>();
+		
 		for(String val : vals)
 		{
 			if(namespace.get(tgt + "/" + val) != null)
 			{
-				retVals.add(tgt + "/" + val);
+				String dir = tgt + "/" + val;
+				retVal.add(dir);
+				
+				ArrayList<String> recDir = ListDirRecursive(dir);
+				if(recDir != null)
+				{
+					retVal.addAll(recDir);
+				}
 			}
 		}
-		return (String[]) retVals.toArray();
+		
+		return retVal;
 	}
 
 	public int CreateFile(String tgtdir, String filename)
 	{
+		tgtdir = SanitizeStr(tgtdir);
+		
 		LinkedList<String> vals = namespace.get(tgtdir);
 		
 		if (vals == null)
@@ -245,6 +304,8 @@ public class Master implements MasterInterface
 
 	public int DeleteFile(String tgtdir, String filename)
 	{
+		tgtdir = SanitizeStr(tgtdir);
+		
 		LinkedList<String> vals = namespace.get(tgtdir);
 		
 		if (vals == null)
@@ -270,5 +331,15 @@ public class Master implements MasterInterface
 	public int CloseFile(FileHandle ofh)
 	{
 		return 0;
+	}
+	
+	private String SanitizeStr(String src)
+	{
+		if (src != "/" && src.endsWith("/"))
+		{
+			return src.substring(0, src.length() - 1);
+		}
+		
+		return src;
 	}
 }
