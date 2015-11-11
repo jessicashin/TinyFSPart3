@@ -4,8 +4,9 @@ import com.client.FileHandle;
 
 public interface MasterInterface {
 	
+	// FSReturnVals
 	public static final int DirExists			= 1; // Returned by CreateDir when directory exists
-	public static final int	DirNotEmpty			= 2; //Returned when a non-empty directory is deleted
+	public static final int	DirNotEmpty			= 2; // Returned when a non-empty directory is deleted
 	public static final int	SrcDirNotExistent	= 3; // Returned when source directory does not exist
 	public static final int	DestDirExists		= 4; // Returned when a destination directory exists
 	public static final int	FileExists			= 5; // Returned when a file exists
