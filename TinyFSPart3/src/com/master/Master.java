@@ -239,7 +239,7 @@ public class Master implements MasterInterface
 		
 		if (retVal == null)
 		{
-			return null;
+			return new String[0];
 		}
 		
 		return retVal.toArray(new String[retVal.size()]);
@@ -289,7 +289,10 @@ public class Master implements MasterInterface
 		
 		if (vals == null)
 		{
-			return SrcDirNotExistent;
+			String src = tgtdir.substring(0, tgtdir.lastIndexOf("/"));
+			String dirname = tgtdir.substring(tgtdir.lastIndexOf("/") + 1, tgtdir.length());
+			CreateDir(src, dirname);
+			vals = namespace.get(tgtdir);
 		}
 		
 		if (vals.contains(filename))
