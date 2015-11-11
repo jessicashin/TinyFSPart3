@@ -1,7 +1,7 @@
 package com.client;
 
 public class FileHandle {
-	final static String filePath = "csci485/";
+	final static String root = "csci485";
 	String directory;
 	String filename;
 	String handle;
@@ -13,8 +13,12 @@ public class FileHandle {
 	}
 	
 	public FileHandle(String tgtdir, String fn) {
-		directory = tgtdir;
 		filename = fn;
+		if (tgtdir == "/") {
+			directory = root;
+		} else {
+			directory = root + tgtdir;
+		}
 		handle = directory + "/" + filename;
 	}
 	
