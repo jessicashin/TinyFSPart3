@@ -1,5 +1,7 @@
 package com.client;
 
+import java.nio.ByteBuffer;
+
 import com.client.ClientFS.FSReturnVals;
 
 public class ClientRec {
@@ -32,9 +34,9 @@ public class ClientRec {
 	 * Reads the first record of the file specified by ofh into payload Returns
 	 * BadHandle if ofh is invalid Returns RecDoesNotExist if the file is empty
 	 *
-	 * Example usage: ReadFirstRecord(FH1, rec, recid)
+	 * Example usage: ReadFirstRecord(FH1, tinyRec)
 	 */
-	public FSReturnVals ReadFirstRecord(FileHandle ofh, byte[] payload, RID RecordID) {
+	public FSReturnVals ReadFirstRecord(FileHandle ofh, TinyRec rec){
 		return null;
 	}
 
@@ -42,9 +44,9 @@ public class ClientRec {
 	 * Reads the last record of the file specified by ofh into payload Returns
 	 * BadHandle if ofh is invalid Returns RecDoesNotExist if the file is empty
 	 *
-	 * Example usage: ReadLastRecord(FH1, rec, recid)
+	 * Example usage: ReadLastRecord(FH1, tinyRec)
 	 */
-	public FSReturnVals ReadLastRecord(FileHandle ofh, byte[] payload, RID RecordID) {
+	public FSReturnVals ReadLastRecord(FileHandle ofh, TinyRec rec){
 		return null;
 	}
 
@@ -53,10 +55,10 @@ public class ClientRec {
 	 * ofh into payload Returns BadHandle if ofh is invalid Returns
 	 * RecDoesNotExist if the file is empty or pivot is invalid
 	 *
-	 * Example usage: 1. ReadFirstRecord(FH1, rec, rec1) 2. ReadNextRecord(FH1,
-	 * rec1, rec, rec2) 3. ReadNextRecord(FH1, rec2, rec, rec3)
+	 * Example usage: 1. ReadFirstRecord(FH1, tinyRec1) 2. ReadNextRecord(FH1,
+	 * rec1, tinyRec2) 3. ReadNextRecord(FH1, rec2, tinyRec3)
 	 */
-	public FSReturnVals ReadNextRecord(FileHandle ofh, RID pivot, byte[] payload, RID RecordID) {
+	public FSReturnVals ReadNextRecord(FileHandle ofh, RID pivot, TinyRec rec){
 		return null;
 	}
 
@@ -65,10 +67,10 @@ public class ClientRec {
 	 * by ofh into payload Returns BadHandle if ofh is invalid Returns
 	 * RecDoesNotExist if the file is empty or pivot is invalid
 	 *
-	 * Example usage: 1. ReadLastRecord(FH1, rec, recn) 2. ReadPrevRecord(FH1,
-	 * recn-1, rec, rec2) 3. ReadPrevRecord(FH1, recn-2, rec, rec3)
+	 * Example usage: 1. ReadLastRecord(FH1, tinyRec1) 2. ReadPrevRecord(FH1,
+	 * recn-1, tinyRec2) 3. ReadPrevRecord(FH1, recn-2, tinyRec3)
 	 */
-	public FSReturnVals ReadPrevRecord(FileHandle ofh, RID pivot, byte[] payload, RID RecordID) {
+	public FSReturnVals ReadPrevRecord(FileHandle ofh, RID pivot, TinyRec rec){
 		return null;
 	}
 
