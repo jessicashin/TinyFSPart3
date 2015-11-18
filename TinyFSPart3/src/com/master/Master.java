@@ -27,7 +27,7 @@ public class Master implements MasterInterface
 	
 	public Master()
 	{
-		ReadMetadata();
+		//ReadMetadata();
 		if (namespace.get("/") == null)
 		{
 			namespace.put("/", new LinkedList<String>());
@@ -233,7 +233,7 @@ public class Master implements MasterInterface
 		
 		if (retVal == null)
 		{
-			return new String[0];
+			return null;
 		}
 		
 		return retVal.toArray(new String[retVal.size()]);
@@ -283,10 +283,7 @@ public class Master implements MasterInterface
 		
 		if (vals == null)
 		{
-			String src = tgtdir.substring(0, tgtdir.lastIndexOf("/"));
-			String dirname = tgtdir.substring(tgtdir.lastIndexOf("/") + 1, tgtdir.length());
-			CreateDir(src, dirname);
-			vals = namespace.get(tgtdir);
+			return SrcDirNotExistent;
 		}
 		
 		if (vals.contains(filename))
