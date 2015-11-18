@@ -131,7 +131,7 @@ public class ClientRec {
 			if (!success) {
 				return FSReturnVals.Fail;
 			}
-
+			RecordID= new RID(this.lastChunk(ofh), next_empty);
 			// //update next empty
 			next_empty = next_empty + 4 + payload.length;
 			nextEmpty = ByteBuffer.allocate(4).putInt(next_empty).array();
@@ -139,6 +139,8 @@ public class ClientRec {
 			if (!success) {
 				return FSReturnVals.Fail;
 			} else {
+				///make a new RID 
+				
 				return FSReturnVals.Success;
 			}
 
@@ -155,7 +157,24 @@ public class ClientRec {
 	 * Example usage: DeleteRecord(FH1, RecID1)
 	 */
 	public FSReturnVals DeleteRecord(FileHandle ofh, RID RecordID) {
-		return null;
+		///invalid filehandle????
+		
+		if (RecordID == null) {
+			return FSReturnVals.BadRecID;
+		}else if (RecordID.slot <0) {
+			return FSReturnVals.RecDoesNotExist;
+		}
+		///make offsize -1 
+		///slot 0 4092-4096
+		byte[]invalidOffset= ByteBuffer.allocate(4).putInt(-1).array();
+		boolean success= cs.writeChunk(this.lastChunk(ofh),invalidOffset , (4096-(RecordID.slot+1)*4));
+		
+		if (success){
+			return FSReturnVals.Success;
+		}		
+		else {
+			return FSReturnVals.Fail;
+		}
 	}
 
 	/**
