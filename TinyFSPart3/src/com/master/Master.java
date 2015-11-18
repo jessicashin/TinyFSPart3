@@ -213,7 +213,7 @@ public class Master implements MasterInterface
 		}
 		
 		vals.add(dirname);
-		if(src == "/") src = "";
+		if(src.length() == 1) src = "";
 		namespace.put(src + "/" + dirname, new LinkedList<String>());
 		
 		return Success;
@@ -230,7 +230,7 @@ public class Master implements MasterInterface
 			return SrcDirNotExistent;
 		}
 		
-		if (src == "/") src = "";
+		if (src.length() == 1) src = "";
 		LinkedList<String> dirVals = namespace.get(src + "/" + dirname);
 		
 		if (dirVals == null)
@@ -408,7 +408,7 @@ public class Master implements MasterInterface
 	
 	private synchronized String SanitizeStr(String src)
 	{
-		if (src != "/" && src.endsWith("/"))
+		if (src.endsWith("/") && src.length() > 1)
 		{
 			return src.substring(0, src.length() - 1);
 		}
@@ -443,6 +443,7 @@ public class Master implements MasterInterface
 
 	public static void main(String args[])
 	{
+		System.out.println("Starting Master...");
 		ReadAndProcessRequests();
 	}
 }

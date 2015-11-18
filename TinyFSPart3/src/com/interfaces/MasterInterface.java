@@ -5,19 +5,19 @@ import com.client.FileHandle;
 public interface MasterInterface {
 	
 	// FSReturnVals
-	public static final int DirExists			= 1; // Returned by CreateDir when directory exists
-	public static final int	DirNotEmpty			= 2; // Returned when a non-empty directory is deleted
-	public static final int	SrcDirNotExistent	= 3; // Returned when source directory does not exist
-	public static final int	DestDirExists		= 4; // Returned when a destination directory exists
-	public static final int	FileExists			= 5; // Returned when a file exists
-	public static final int	FileDoesNotExist	= 6; // Returns when a file does not exist
-	public static final int	BadHandle			= 7; // Returned when the handle for an open file is not valid
-	public static final int	RecordTooLong		= 8; // Returned when a record size is larger than chunk size
-	public static final int	BadRecID			= 9; // The specified RID is not valid, used by DeleteRecord
-	public static final int	RecDoesNotExist		= 10; // The specified record does not exist, used by DeleteRecord
-	public static final int	NotImplemented		= 11; // Specific to CSCI 485 and its unit tests
-	public static final int	Success				= 12; //Returned when a method succeeds
-	public static final int	Fail				= 13; //Returned when a method fails
+	public static final int DirExists			= 1;	// Returned by CreateDir when directory exists
+	public static final int	DirNotEmpty			= 2;	// Returned when a non-empty directory is deleted
+	public static final int	SrcDirNotExistent	= 3;	// Returned when source directory does not exist
+	public static final int	DestDirExists		= 4;	// Returned when a destination directory exists
+	public static final int	FileExists			= 5;	// Returned when a file exists
+	public static final int	FileDoesNotExist	= 6;	// Returns when a file does not exist
+	public static final int	BadHandle			= 7;	// Returned when the handle for an open file is not valid
+	public static final int	RecordTooLong		= 8;	// Returned when a record size is larger than chunk size
+	public static final int	BadRecID			= 9;	// The specified RID is not valid, used by DeleteRecord
+	public static final int	RecDoesNotExist		= 10;	// The specified record does not exist, used by DeleteRecord
+	public static final int	NotImplemented		= 11;	// Specific to CSCI 485 and its unit tests
+	public static final int	Success				= 12;	// Returned when a method succeeds
+	public static final int	Fail				= 13;	// Returned when a method fails
 	
 	// Networking Communication Constants
 	public static final int ReqCreateDir		= 101;
