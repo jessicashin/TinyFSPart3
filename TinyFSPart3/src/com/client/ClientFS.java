@@ -1,7 +1,13 @@
 package com.client;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.net.Socket;
+
 import com.interfaces.MasterInterface;
 import com.master.Master;
+import com.network.Network;
 
 public class ClientFS {
 
@@ -56,10 +62,10 @@ public class ClientFS {
 		return FSReturnVals.Fail;
 	}
 	
-	private Master m = null;
+	Client client = null;
 	
 	public ClientFS() {
-		m = new Master();
+		client = new Client();
 	}
 
 	/**
@@ -71,7 +77,28 @@ public class ClientFS {
 	 * "CSCI485"), CreateDir("/Shahram/CSCI485", "Lecture1")
 	 */
 	public FSReturnVals CreateDir(String src, String dirname) {
-		return TranslateMasterRetVal(m.CreateDir(src, dirname));
+		try {
+			Client.WriteOutput.writeInt(Master.ReqCreateDir);
+		
+			byte[] bytes = src.getBytes();
+			Client.WriteOutput.writeInt(bytes.length);
+			Client.WriteOutput.write(bytes);
+			
+			bytes = dirname.getBytes();
+			Client.WriteOutput.writeInt(bytes.length);
+			Client.WriteOutput.write(bytes);
+			
+			Client.WriteOutput.flush();
+			
+			int result = Network.ReadIntFromInputStream("ClientFS", Client.ReadInput);
+			
+			return TranslateMasterRetVal(result);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return TranslateMasterRetVal(MasterInterface.Fail);
 	}
 
 	/**
@@ -82,7 +109,28 @@ public class ClientFS {
 	 * Example usage: DeleteDir("/Shahram/CSCI485", "Lecture1")
 	 */
 	public FSReturnVals DeleteDir(String src, String dirname) {
-		return TranslateMasterRetVal(m.DeleteDir(src, dirname));
+		try {
+			Client.WriteOutput.writeInt(Master.ReqDeleteDir);
+		
+			byte[] bytes = src.getBytes();
+			Client.WriteOutput.writeInt(bytes.length);
+			Client.WriteOutput.write(bytes);
+			
+			bytes = dirname.getBytes();
+			Client.WriteOutput.writeInt(bytes.length);
+			Client.WriteOutput.write(bytes);
+			
+			Client.WriteOutput.flush();
+			
+			int result = Network.ReadIntFromInputStream("ClientFS", Client.ReadInput);
+			
+			return TranslateMasterRetVal(result);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return TranslateMasterRetVal(MasterInterface.Fail);
 	}
 
 	/**
@@ -95,7 +143,28 @@ public class ClientFS {
 	 */
 	//pass to master
 	public FSReturnVals RenameDir(String src, String NewName) {
-		return TranslateMasterRetVal(m.RenameDir(src, NewName));
+		try {
+			Client.WriteOutput.writeInt(Master.ReqRenameDir);
+		
+			byte[] bytes = src.getBytes();
+			Client.WriteOutput.writeInt(bytes.length);
+			Client.WriteOutput.write(bytes);
+			
+			bytes = NewName.getBytes();
+			Client.WriteOutput.writeInt(bytes.length);
+			Client.WriteOutput.write(bytes);
+			
+			Client.WriteOutput.flush();
+			
+			int result = Network.ReadIntFromInputStream("ClientFS", Client.ReadInput);
+			
+			return TranslateMasterRetVal(result);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return TranslateMasterRetVal(MasterInterface.Fail);
 	}
 
 	/**
@@ -109,7 +178,37 @@ public class ClientFS {
 	 */
 	//pass to master
 	public String[] ListDir(String tgt) {
-		return m.ListDir(tgt);
+		try {
+			Client.WriteOutput.writeInt(Master.ReqListDir);
+		
+			byte[] bytes = tgt.getBytes();
+			Client.WriteOutput.writeInt(bytes.length);
+			Client.WriteOutput.write(bytes);
+			
+			Client.WriteOutput.flush();
+			
+			int numStr = Network.ReadIntFromInputStream("ClientFS", Client.ReadInput);
+			if(numStr == -1)
+			{
+				return null;
+			}
+			else
+			{
+				String[] results = new String[numStr];
+				for(int i = 0; i < numStr; ++i)
+				{
+					int length = Network.ReadIntFromInputStream("ClientFS", Client.ReadInput);
+					byte[] resultBytes = Network.RecvPayload("Master", Client.ReadInput, length);
+					results[i] = (new String(resultBytes)).toString();
+				}
+				return results;
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return null;
 	}
 
 	/**
@@ -120,7 +219,28 @@ public class ClientFS {
 	 * Example usage: Createfile("/Shahram/CSCI485/Lecture1", "Intro.pptx")
 	 */
 	public FSReturnVals CreateFile(String tgtdir, String filename) {
-		return TranslateMasterRetVal(m.CreateFile(tgtdir, filename));
+		try {
+			Client.WriteOutput.writeInt(Master.ReqCreateFile);
+		
+			byte[] bytes = tgtdir.getBytes();
+			Client.WriteOutput.writeInt(bytes.length);
+			Client.WriteOutput.write(bytes);
+			
+			bytes = filename.getBytes();
+			Client.WriteOutput.writeInt(bytes.length);
+			Client.WriteOutput.write(bytes);
+			
+			Client.WriteOutput.flush();
+			
+			int result = Network.ReadIntFromInputStream("ClientFS", Client.ReadInput);
+			
+			return TranslateMasterRetVal(result);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return TranslateMasterRetVal(MasterInterface.Fail);
 	}
 
 	/**
@@ -131,7 +251,28 @@ public class ClientFS {
 	 * Example usage: DeleteFile("/Shahram/CSCI485/Lecture1", "Intro.pptx")
 	 */
 	public FSReturnVals DeleteFile(String tgtdir, String filename) {
-		return TranslateMasterRetVal(m.DeleteFile(tgtdir, filename));
+		try {
+			Client.WriteOutput.writeInt(Master.ReqDeleteFile);
+		
+			byte[] bytes = tgtdir.getBytes();
+			Client.WriteOutput.writeInt(bytes.length);
+			Client.WriteOutput.write(bytes);
+			
+			bytes = filename.getBytes();
+			Client.WriteOutput.writeInt(bytes.length);
+			Client.WriteOutput.write(bytes);
+			
+			Client.WriteOutput.flush();
+			
+			int result = Network.ReadIntFromInputStream("ClientFS", Client.ReadInput);
+			
+			return TranslateMasterRetVal(result);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return TranslateMasterRetVal(MasterInterface.Fail);
 	}
 
 	/**
@@ -141,7 +282,7 @@ public class ClientFS {
 	 * Example usage: OpenFile("/Shahram/CSCI485/Lecture1/Intro.pptx")
 	 */
 	public FSReturnVals OpenFile(String FilePath, FileHandle ofh) {
-		return TranslateMasterRetVal(m.OpenFile(FilePath, ofh));
+		return TranslateMasterRetVal(MasterInterface.Fail);
 	}
 
 	/**
@@ -151,7 +292,7 @@ public class ClientFS {
 	 * Example usage: CloseFile(FH1)
 	 */
 	public FSReturnVals CloseFile(FileHandle ofh) {
-		return TranslateMasterRetVal(m.CloseFile(ofh));
+		return TranslateMasterRetVal(MasterInterface.Fail);
 	}
 
 }

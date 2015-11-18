@@ -10,6 +10,8 @@ import com.network.Network;
 public class MasterThread extends Thread {
 	private Master master = null;
 	private Socket socket = null;
+	private ObjectInputStream readInput = null;
+	private ObjectOutputStream writeOutput = null;
 	
 	public MasterThread(Master m, Socket s) {
 		super("MasterThread");
@@ -17,56 +19,51 @@ public class MasterThread extends Thread {
 		this.socket = s;
 	}
 	
-	public void run() {
-		ObjectInputStream readInput = null;
-		ObjectOutputStream writeOutput = null;
-		
+	public void run() {		
 		try {
 			readInput = new ObjectInputStream(socket.getInputStream());
 			writeOutput = new ObjectOutputStream(socket.getOutputStream());
 			
 			// Use the input and output stream as long as the client is connected.
 			while (!socket.isClosed()) {
-				int payloadsize =  Network.ReadIntFromInputStream("Master", readInput);
+				int reqId = Network.ReadIntFromInputStream("Master", readInput);
 				
-				if (payloadsize == -1)
+				if (reqId == -1)
 				{
 					break;
 				}
 				
-				int reqId = Network.ReadIntFromInputStream("Master", readInput);
-				
 				switch (reqId) {
 					case Master.ReqCreateDir:
-						HandleReqCreateDir(readInput, writeOutput);
+						HandleReqCreateDir();
 						break;
 
 					case Master.ReqDeleteDir:
-						HandleReqDeleteDir(readInput, writeOutput);
+						HandleReqDeleteDir();
 						break;
 
 					case Master.ReqRenameDir:
-						HandleReqRenameDir(readInput, writeOutput);
+						HandleReqRenameDir();
 						break;
 
 					case Master.ReqListDir:
-						HandleReqListDir(readInput, writeOutput);
+						HandleReqListDir();
 						break;
 
 					case Master.ReqCreateFile:
-						HandleReqCreateFile(readInput, writeOutput);
+						HandleReqCreateFile();
 						break;
 
 					case Master.ReqDeleteFile:
-						HandleReqDeleteFile(readInput, writeOutput);
+						HandleReqDeleteFile();
 						break;
 
 					case Master.ReqOpenFile:
-						HandleReqOpenFile(readInput, writeOutput);
+						HandleReqOpenFile();
 						break;
 
 					case Master.ReqCloseFile:
-						HandleReqCloseFile(readInput, writeOutput);
+						HandleReqCloseFile();
 						break;
 	
 					default:
@@ -91,61 +88,141 @@ public class MasterThread extends Thread {
 		}
 	}
 	
-	private void HandleReqCreateDir(ObjectInputStream readInput, ObjectOutputStream writeOutput)
+	private void HandleReqCreateDir()
 	{
-		/*
-		int offset =  Network.ReadIntFromInputStream("Master", ReadInput);
-		int payloadlength =  Network.ReadIntFromInputStream("Master", ReadInput);
-		int chunkhandlesize = payloadsize - ChunkServer.PayloadSZ - ChunkServer.CMDlength - (2 * 4);
-		if (chunkhandlesize < 0)
-			System.out.println("Error in ChunkServer.java, ReadChunkCMD has wrong size.");
-		byte[] CHinBytes = Network.RecvPayload("ChunkServer", ReadInput, chunkhandlesize);
-		String ChunkHandle = (new String(CHinBytes)).toString();
+		int length = Network.ReadIntFromInputStream("Master", readInput);
+		byte[] bytes = Network.RecvPayload("Master", readInput, length);
+		String src = (new String(bytes)).toString();
 		
-		byte[] res = cs.readChunk(ChunkHandle, offset, payloadlength);
+		length = Network.ReadIntFromInputStream("Master", readInput);
+		bytes = Network.RecvPayload("Master", readInput, length);
+		String dirname = (new String(bytes)).toString();
 		
-		if (res == null)
-			WriteOutput.writeInt(ChunkServer.PayloadSZ);
-		else {
-			WriteOutput.writeInt(ChunkServer.PayloadSZ + res.length);
-			WriteOutput.write(res);
+		int result = master.CreateDir(src, dirname);
+		
+		try {
+			writeOutput.writeInt(result);
+			writeOutput.flush();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
-		WriteOutput.flush();
-		break;
-		*/
 	}
 	
-	private void HandleReqDeleteDir(ObjectInputStream readInput, ObjectOutputStream writeOutput)
+	private void HandleReqDeleteDir()
+	{
+		int length = Network.ReadIntFromInputStream("Master", readInput);
+		byte[] bytes = Network.RecvPayload("Master", readInput, length);
+		String src = (new String(bytes)).toString();
+		
+		length = Network.ReadIntFromInputStream("Master", readInput);
+		bytes = Network.RecvPayload("Master", readInput, length);
+		String dirname = (new String(bytes)).toString();
+		
+		int result = master.DeleteDir(src, dirname);
+		
+		try {
+			writeOutput.writeInt(result);
+			writeOutput.flush();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private void HandleReqRenameDir()
+	{
+		int length = Network.ReadIntFromInputStream("Master", readInput);
+		byte[] bytes = Network.RecvPayload("Master", readInput, length);
+		String src = (new String(bytes)).toString();
+		
+		length = Network.ReadIntFromInputStream("Master", readInput);
+		bytes = Network.RecvPayload("Master", readInput, length);
+		String NewName = (new String(bytes)).toString();
+		
+		int result = master.RenameDir(src, NewName);
+		
+		try {
+			writeOutput.writeInt(result);
+			writeOutput.flush();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private void HandleReqListDir()
+	{
+		int length = Network.ReadIntFromInputStream("Master", readInput);
+		byte[] bytes = Network.RecvPayload("Master", readInput, length);
+		String tgt = (new String(bytes)).toString();
+		
+		String[] results = master.ListDir(tgt);
+		
+		try {
+			if (results == null)
+			{
+				writeOutput.writeInt(-1);
+			}
+			else
+			{
+				writeOutput.writeInt(results.length);
+				for(int i = 0; i < results.length; ++i)
+				{
+					byte[] resultBytes = results[i].getBytes();
+					writeOutput.writeInt(resultBytes.length);
+					writeOutput.write(resultBytes);
+				}
+			}
+			writeOutput.flush();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private void HandleReqCreateFile()
+	{
+		int length = Network.ReadIntFromInputStream("Master", readInput);
+		byte[] bytes = Network.RecvPayload("Master", readInput, length);
+		String tgtdir = (new String(bytes)).toString();
+		
+		length = Network.ReadIntFromInputStream("Master", readInput);
+		bytes = Network.RecvPayload("Master", readInput, length);
+		String filename = (new String(bytes)).toString();
+		
+		int result = master.CreateFile(tgtdir, filename);
+		
+		try {
+			writeOutput.writeInt(result);
+			writeOutput.flush();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private void HandleReqDeleteFile()
+	{
+		int length = Network.ReadIntFromInputStream("Master", readInput);
+		byte[] bytes = Network.RecvPayload("Master", readInput, length);
+		String tgtdir = (new String(bytes)).toString();
+		
+		length = Network.ReadIntFromInputStream("Master", readInput);
+		bytes = Network.RecvPayload("Master", readInput, length);
+		String filename = (new String(bytes)).toString();
+		
+		int result = master.DeleteFile(tgtdir, filename);
+		
+		try {
+			writeOutput.writeInt(result);
+			writeOutput.flush();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private void HandleReqOpenFile()
 	{
 		
 	}
 	
-	private void HandleReqRenameDir(ObjectInputStream readInput, ObjectOutputStream writeOutput)
-	{
-		
-	}
-	
-	private void HandleReqListDir(ObjectInputStream readInput, ObjectOutputStream writeOutput)
-	{
-		
-	}
-	
-	private void HandleReqCreateFile(ObjectInputStream readInput, ObjectOutputStream writeOutput)
-	{
-		
-	}
-	
-	private void HandleReqDeleteFile(ObjectInputStream readInput, ObjectOutputStream writeOutput)
-	{
-		
-	}
-	
-	private void HandleReqOpenFile(ObjectInputStream readInput, ObjectOutputStream writeOutput)
-	{
-		
-	}
-	
-	private void HandleReqCloseFile(ObjectInputStream readInput, ObjectOutputStream writeOutput)
+	private void HandleReqCloseFile()
 	{
 		
 	}

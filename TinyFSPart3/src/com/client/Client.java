@@ -15,6 +15,7 @@ import java.nio.ByteBuffer;
 
 import com.chunkserver.ChunkServer;
 import com.interfaces.ClientInterface;
+import com.master.Master;
 import com.network.Network;
 
 /**
@@ -39,7 +40,8 @@ public class Client implements ClientInterface {
 			port = port.substring( port.indexOf(':')+1 );
 			ServerPort = Integer.parseInt(port);
 			
-			ClientSocket = new Socket("127.0.0.1", ServerPort);
+			//ClientSocket = new Socket("127.0.0.1", ServerPort);
+			ClientSocket = new Socket(Master.MasterIpAddr, Master.MasterPort);
 			WriteOutput = new ObjectOutputStream(ClientSocket.getOutputStream());
 			ReadInput = new ObjectInputStream(ClientSocket.getInputStream());
 		}catch (FileNotFoundException e) {
