@@ -119,6 +119,13 @@ public class Master implements MasterInterface
 		ReadStrHashTable(FileChunksFile, files);
 	}
 	
+	public synchronized boolean ValidFileHandle(FileHandle file) {
+		if (files.containsKey(file.get())) {
+			return true;
+		}
+		return false;
+	}
+	
 	public synchronized String AppendChunk(FileHandle file)
 	{
 		LinkedList<String> chunks = files.get(file.get());
