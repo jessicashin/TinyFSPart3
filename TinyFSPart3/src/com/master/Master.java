@@ -18,6 +18,8 @@ import com.interfaces.MasterInterface;
 
 public class Master implements MasterInterface
 {
+	public static long ChunkCounter = 1;
+	
 	public final static String NamespaceFile = "namespace.txt";
 	public final static String FileChunksFile = "filechunks.txt";
 
@@ -115,6 +117,83 @@ public class Master implements MasterInterface
 		// Read all of the metadata.
 		ReadStrHashTable(NamespaceFile, namespace);
 		ReadStrHashTable(FileChunksFile, files);
+	}
+	
+	public synchronized String AppendChunk(FileHandle file)
+	{
+		LinkedList<String> chunks = files.get(file.get());
+		
+		if (chunks == null)
+		{
+			return null;
+		}
+		
+		String newChunk = String.valueOf(++ChunkCounter);
+		chunks.add(newChunk);
+		
+		return newChunk;
+	}
+	
+	public synchronized String GetFirstChunk(FileHandle file)
+	{
+		LinkedList<String> chunks = files.get(file.get());
+		
+		if (chunks == null)
+		{
+			return null;
+		}
+		
+		return chunks.getFirst();
+	}
+	
+	public synchronized String GetLastChunk(FileHandle file)
+	{
+		LinkedList<String> chunks = files.get(file.get());
+		
+		if (chunks == null)
+		{
+			return null;
+		}
+		
+		return chunks.getLast();
+	}
+	
+	public synchronized String GetNextChunk(FileHandle file, String pivot)
+	{
+		LinkedList<String> chunks = files.get(file.get());
+		
+		if (chunks == null)
+		{
+			return null;
+		}
+		
+		int index = chunks.indexOf(pivot);
+		
+		if (index == -1 || index == chunks.size() - 1)
+		{
+			return null;
+		}
+		
+		return chunks.get(index + 1);
+	}
+	
+	public synchronized String GetPreviousChunk(FileHandle file, String pivot)
+	{
+		LinkedList<String> chunks = files.get(file.get());
+		
+		if (chunks == null)
+		{
+			return null;
+		}
+		
+		int index = chunks.indexOf(pivot);
+		
+		if (index == -1 || index == 0)
+		{
+			return null;
+		}
+		
+		return chunks.get(index - 1);
 	}
 	
 	public synchronized int CreateDir(String src, String dirname)

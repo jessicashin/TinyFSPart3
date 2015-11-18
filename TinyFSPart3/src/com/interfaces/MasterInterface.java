@@ -34,6 +34,31 @@ public interface MasterInterface {
 	public static final int MasterPort = 3469;
 	
 	/**
+	 * Appends a chunk to the file.
+	 */
+	public String AppendChunk(FileHandle file);
+	
+	/**
+	 * Gets the first chunk's handle for a file.
+	 */
+	public String GetFirstChunk(FileHandle file);
+	
+	/**
+	 * Gets the last chunk's handle for a file.
+	 */
+	public String GetLastChunk(FileHandle file);
+	
+	/**
+	 * Gets the next chunk's handle for a file.
+	 */
+	public String GetNextChunk(FileHandle file, String pivot);
+	
+	/**
+	 * Gets the previous chunk's handle for a file.
+	 */
+	public String GetPreviousChunk(FileHandle file, String pivot);
+	
+	/**
 	 * Creates the specified dirname in the src directory Returns
 	 * SrcDirNotExistent if the src directory does not exist Returns
 	 * DestDirExists if the specified dirname exists
