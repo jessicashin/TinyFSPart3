@@ -5,6 +5,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
+import com.chunkserver.ChunkServer;
 import com.network.Network;
 
 public class MasterThread extends Thread {
@@ -93,7 +94,26 @@ public class MasterThread extends Thread {
 	
 	private void HandleReqCreateDir(ObjectInputStream readInput, ObjectOutputStream writeOutput)
 	{
+		/*
+		int offset =  Network.ReadIntFromInputStream("Master", ReadInput);
+		int payloadlength =  Network.ReadIntFromInputStream("Master", ReadInput);
+		int chunkhandlesize = payloadsize - ChunkServer.PayloadSZ - ChunkServer.CMDlength - (2 * 4);
+		if (chunkhandlesize < 0)
+			System.out.println("Error in ChunkServer.java, ReadChunkCMD has wrong size.");
+		byte[] CHinBytes = Network.RecvPayload("ChunkServer", ReadInput, chunkhandlesize);
+		String ChunkHandle = (new String(CHinBytes)).toString();
 		
+		byte[] res = cs.readChunk(ChunkHandle, offset, payloadlength);
+		
+		if (res == null)
+			WriteOutput.writeInt(ChunkServer.PayloadSZ);
+		else {
+			WriteOutput.writeInt(ChunkServer.PayloadSZ + res.length);
+			WriteOutput.write(res);
+		}
+		WriteOutput.flush();
+		break;
+		*/
 	}
 	
 	private void HandleReqDeleteDir(ObjectInputStream readInput, ObjectOutputStream writeOutput)
