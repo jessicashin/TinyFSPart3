@@ -13,13 +13,13 @@ public class FileHandle {
 	}
 	
 	public FileHandle(String tgtdir, String fn) {
+		directory = tgtdir;
 		filename = fn;
 		if (tgtdir == "/") {
-			directory = root;
+			handle = tgtdir + fn;
 		} else {
-			directory = root + tgtdir;
+			handle = tgtdir + "/" + fn;
 		}
-		handle = directory + "/" + filename;
 	}
 	
 	public String get() {

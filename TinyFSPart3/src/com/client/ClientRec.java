@@ -12,6 +12,16 @@ import com.master.Master;
 
 public class ClientRec {
 
+	Master m = new Master();
+	ChunkServer cs = new ChunkServer();
+	final static String filePath = "csci485/";
+	public final static int ChunkSize = 4 * 1024; //4 KB chunk sizes
+
+	public String lastChunk(FileHandle ofh) {
+		// /find the last chunk of filehandle
+		return m.GetLastChunk(ofh);
+	}
+	
 	/**
 	 * Appends a record to the open file as specified by ofh Returns BadHandle
 	 * if ofh is invalid Returns BadRecID if the specified RID is not null
@@ -20,21 +30,13 @@ public class ClientRec {
 	 *
 	 * Example usage: AppendRecord(FH1, obama, RecID1)
 	 */
-	// /create new master
-
-	Master m = new Master();
-	ChunkServer cs = new ChunkServer();
-	final static String filePath = "csci485/";
-
-	public String lastChunk(FileHandle ofh) {
-		// /find the last chunk of filehandle
-		return m.GetLastChunk(ofh);
-	}
-
 	public FSReturnVals AppendRecord(FileHandle ofh, byte[] payload,
 			RID RecordID) {
 		// /// use the chunkhandle defined in RID class
-		// filehandle invalid?
+		if (!m.ValidFileHandle(ofh)) {
+			return FSReturnVals.BadHandle;
+		}
+		RID recordID = new RID(m.GetFirstChunk(ofh),0);
 		if (RecordID != null) {
 			return FSReturnVals.BadRecID;
 		} else if (payload.length > 4096) {
@@ -131,7 +133,7 @@ public class ClientRec {
 			if (!success) {
 				return FSReturnVals.Fail;
 			}
-
+			RecordID= new RID(this.lastChunk(ofh), next_empty);
 			// //update next empty
 			next_empty = next_empty + 4 + payload.length;
 			nextEmpty = ByteBuffer.allocate(4).putInt(next_empty).array();
@@ -139,6 +141,8 @@ public class ClientRec {
 			if (!success) {
 				return FSReturnVals.Fail;
 			} else {
+				///make a new RID 
+				
 				return FSReturnVals.Success;
 			}
 
@@ -155,7 +159,25 @@ public class ClientRec {
 	 * Example usage: DeleteRecord(FH1, RecID1)
 	 */
 	public FSReturnVals DeleteRecord(FileHandle ofh, RID RecordID) {
-		return null;
+		if (!m.ValidFileHandle(ofh)) {
+			return FSReturnVals.BadHandle;
+		}
+		if (RecordID == null) {
+			return FSReturnVals.BadRecID;
+		}else if (RecordID.slot <0) {
+			return FSReturnVals.RecDoesNotExist;
+		}
+		///make offsize -1 
+		///slot 0 4092-4096
+		byte[]invalidOffset= ByteBuffer.allocate(4).putInt(-1).array();
+		boolean success= cs.writeChunk(this.lastChunk(ofh),invalidOffset , (4096-(RecordID.slot+1)*4));
+		
+		if (success){
+			return FSReturnVals.Success;
+		}		
+		else {
+			return FSReturnVals.Fail;
+		}
 	}
 
 	/**
@@ -165,7 +187,23 @@ public class ClientRec {
 	 * Example usage: ReadFirstRecord(FH1, tinyRec)
 	 */
 	public FSReturnVals ReadFirstRecord(FileHandle ofh, TinyRec rec) {
-		return null;
+		String ch = m.GetFirstChunk(ofh);
+		if (!m.ValidFileHandle(ofh)) {
+			return FSReturnVals.BadHandle;
+		}
+		if (ch == null) {
+			return FSReturnVals.RecDoesNotExist;
+		}
+		RID recordID = new RID(ch,0);
+		byte[] recordLength = cs.readChunk(ch, 8, 4);
+		int recLength = ByteBuffer.wrap(recordLength).getInt();
+		byte[] payload = cs.readChunk(ch, (4096-4), 4);
+		rec.setPayload(payload);
+		rec.setRID(recordID);
+		if (rec.getPayload() == null || rec.getRID() == null) {
+			return FSReturnVals.Fail;
+		}
+		return FSReturnVals.Success;
 	}
 
 	/**
@@ -175,7 +213,8 @@ public class ClientRec {
 	 * Example usage: ReadLastRecord(FH1, tinyRec)
 	 */
 	public FSReturnVals ReadLastRecord(FileHandle ofh, TinyRec rec) {
-		return null;
+		
+		return FSReturnVals.Success;
 	}
 
 	/**
