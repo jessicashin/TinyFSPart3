@@ -14,7 +14,7 @@ public interface ChunkServerInterface {
 	/**
 	 * Return the chunkhandle for a newly created chunk.
 	 */
-	public String createChunk();
+	public void createChunk(String ChunkHandle);
 	
 	/**
 	 * Write the byte array payload to the ChunkHandle at the specified offset.
