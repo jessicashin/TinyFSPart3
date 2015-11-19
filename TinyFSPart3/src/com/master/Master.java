@@ -120,20 +120,22 @@ public class Master implements MasterInterface
 	}
 	
 	public synchronized boolean ValidFileHandle(FileHandle file) {
-		/*if (files==null){
-			System.out.println("hash is null"+" "+true); 
-		return false; 	
-		}else if (file==null){
-			System.out.println("file is null"+" "+true); 
-		return false;	
-		}*/
-		System.out.println(file.getDirectory()+" "+ file.get()+" "+true);
-		if (files.containsKey(file.get())) {
-			System.out.println(file.get()+" "+true); 
+		
+		if (namespace.containsKey(file.getDirectory())) {
+			//System.out.println(file.getDirectory()+" "+file.getFilename()+" "+file.get()+" :validFileHandle: "+true); 
 			return true;
 		}
-		System.out.println(file.get()+" "+false); 
+		//System.out.println(file.getDirectory()+" "+file.getFilename()+" "+file.get()+" :validFileHandle: "+false); 
 		return false;
+	}
+	
+	public synchronized boolean ValidChunkHandle(FileHandle file, String chunk) {
+		LinkedList<String> chunks = files.get(file.get());
+		if (chunks.contains(chunk)) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 	
 	public synchronized String AppendChunk(FileHandle file)

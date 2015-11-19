@@ -283,25 +283,23 @@ public class ClientFS {
 	 * Example usage: OpenFile("/Shahram/CSCI485/Lecture1/Intro.pptx")
 	 */
 	public  FSReturnVals OpenFile(String FilePath, FileHandle ofh) {
-		System.out.println("openfile:"+FilePath); 
+		///System.out.println("openfile:"+FilePath); 
 		int count = FilePath.length() - FilePath.replace("/", "").length();
 		if (count<1){
 		return FSReturnVals.BadHandle; 	
 		}else if (count==1){
-			ofh= new FileHandle ("/", FilePath.substring(1, FilePath.length())); 
 			ofh.directory="/"; 
 			ofh.filename=FilePath.substring(1, FilePath.length());
-			ofh.setDirectory("/");
-			ofh.setFilename(FilePath.substring(1, FilePath.length()));
+			ofh.handle=FilePath; 
 		}else {
 			int lastSlash=FilePath.lastIndexOf('/'); 
-			ofh= new FileHandle (FilePath.substring(0, lastSlash), FilePath.substring(lastSlash+1, FilePath.length())); 
 			ofh.directory=FilePath.substring(0, lastSlash); 
 			ofh.filename=FilePath.substring(lastSlash+1, FilePath.length()); 
 			ofh.setDirectory(FilePath.substring(0, lastSlash));
 			ofh.setFilename(FilePath.substring(lastSlash+1, FilePath.length()));
+			ofh.handle=FilePath; 
 		}
-		System.out.println(ofh.get()+" "+ofh.getDirectory()+" "+ofh.getFilename()); 
+		//System.out.println(ofh.get()+" "+ofh.getDirectory()+" "+ofh.getFilename()); 
 		return TranslateMasterRetVal(MasterInterface.Success);
 		
 	}

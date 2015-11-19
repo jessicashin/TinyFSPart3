@@ -1,3 +1,4 @@
+
 package com.client;
 
 import java.io.File;
@@ -33,15 +34,15 @@ public class ClientRec {
 	public FSReturnVals AppendRecord(FileHandle ofh, byte[] payload,
 			RID RecordID) {
 		// /// use the chunkhandle defined in RID class
-		/*if (ofh==null){
-			System.out.println("filehandle is null!"); 
+		/*if (!m.ValidFileHandle(ofh)) {
 			return FSReturnVals.BadHandle;
 		}*/
-		if (!m.ValidFileHandle(ofh)) {
-			System.out.println("filehandle is invalid!"); 
-			return FSReturnVals.BadHandle;
+		if (m.GetLastChunk(ofh)==null){
+			//System.out.println("null for last chunk!"); 
+			m.AppendChunk(ofh); 
 		}
-		RID recordID = new RID(m.GetFirstChunk(ofh),0);
+		
+		RID recordID = new RID(m.GetLastChunk(ofh),0);
 		if (RecordID != null) {
 			return FSReturnVals.BadRecID;
 		} else if (payload.length > 4096) {
@@ -55,8 +56,12 @@ public class ClientRec {
 		if ((numOfRecords == null)
 				|| (ByteBuffer.wrap(numOfRecords).getInt() == 0)) {
 			// /append a new record to a empty file
-			RecordID.chunk=this.lastChunk(ofh);
-			RecordID.slot=0;
+			RecordID.chunk=this.lastChunk(ofh); 
+			if (RecordID.slot==-1){
+				RecordID.slot=0; 
+			}else {
+				RecordID.slot++; 
+			}
 			byte[] numRec = ByteBuffer.allocate(4).putInt(1).array();
 			success = cs.writeChunk(this.lastChunk(ofh), numRec, 0);
 			if (!success) {
@@ -94,8 +99,6 @@ public class ClientRec {
 		} else {
 			// /has at least one record in the chunk
 			int numRec = ByteBuffer.wrap(numOfRecords).getInt();
-			RecordID.chunk=this.lastChunk(ofh);
-			RecordID.slot=numRec;
 			byte[] previousOffset = cs.readChunk(this.lastChunk(ofh),
 					4096 - numRec * 4, 4);
 			int previous_offset = ByteBuffer.wrap(previousOffset).getInt();
@@ -130,7 +133,7 @@ public class ClientRec {
 				return FSReturnVals.Fail;
 			}
 
-			///write next offset address to the end
+			// /write next offset address to the end
 			byte[] nextOffset = ByteBuffer.allocate(4).putInt(next_empty)
 					.array();
 			if (next_empty + 4 + payload.length > (4096 - numRec * 4)) {
@@ -141,10 +144,10 @@ public class ClientRec {
 			if (!success) {
 				return FSReturnVals.Fail;
 			}
-			//???
-			//RecordID= new RID(this.lastChunk(ofh), next_empty);
-			 
-			////update next empty
+			RecordID= new RID(this.lastChunk(ofh), next_empty);
+			RecordID.chunk=this.lastChunk(ofh); 
+			RecordID.slot++; 
+			// //update next empty
 			next_empty = next_empty + 4 + payload.length;
 			nextEmpty = ByteBuffer.allocate(4).putInt(next_empty).array();
 			success = cs.writeChunk(this.lastChunk(ofh), nextEmpty, 4);
@@ -169,18 +172,18 @@ public class ClientRec {
 	 * Example usage: DeleteRecord(FH1, RecID1)
 	 */
 	public FSReturnVals DeleteRecord(FileHandle ofh, RID RecordID) {
-		if (!m.ValidFileHandle(ofh)) {
+		/*if (!m.ValidFileHandle(ofh)) {
 			return FSReturnVals.BadHandle;
-		}
+		}*/
 		if (RecordID == null) {
 			return FSReturnVals.BadRecID;
-		}else if (RecordID.slot <0) {
+		}else if (RecordID.getSlot() <0) {
 			return FSReturnVals.RecDoesNotExist;
 		}
 		///make offsize -1 
 		///slot 0 4092-4096
 		byte[]invalidOffset= ByteBuffer.allocate(4).putInt(-1).array();
-		boolean success= cs.writeChunk(this.lastChunk(ofh),invalidOffset , (4096-(RecordID.slot+1)*4));
+		boolean success= cs.writeChunk(this.lastChunk(ofh),invalidOffset , (4096-(RecordID.getSlot()+1)*4));
 		
 		if (success){
 			return FSReturnVals.Success;
@@ -197,19 +200,26 @@ public class ClientRec {
 	 * Example usage: ReadFirstRecord(FH1, tinyRec)
 	 */
 	public FSReturnVals ReadFirstRecord(FileHandle ofh, TinyRec rec) {
-		String ch = m.GetFirstChunk(ofh);
-		if (!m.ValidFileHandle(ofh)) {
+		/*if (!m.ValidFileHandle(ofh)) {
+			System.out.println("invalid!"+ofh.handle); 
 			return FSReturnVals.BadHandle;
-		}
+		}*/
+		String ch = m.GetFirstChunk(ofh);
 		if (ch == null) {
+			System.out.println("recorddoesnotexist"); 
 			return FSReturnVals.RecDoesNotExist;
 		}
 		RID recordID = new RID(ch,0);
+		recordID.chunk=ch; 
+		recordID.slot=0; 
 		byte[] recordLength = cs.readChunk(ch, 8, 4);
 		int recLength = ByteBuffer.wrap(recordLength).getInt();
 		byte[] payload = cs.readChunk(ch, 8, recLength);
+		rec.ID=recordID; 
+		rec.payload=payload; 
 		rec.setPayload(payload);
 		rec.setRID(recordID);
+		System.out.println(rec.ID+":"+rec.ID.chunk+ "::"+rec.ID.slot); 
 		if (rec.getPayload() == null || rec.getRID() == null) {
 			return FSReturnVals.Fail;
 		}
@@ -223,23 +233,29 @@ public class ClientRec {
 	 * Example usage: ReadLastRecord(FH1, tinyRec)
 	 */
 	public FSReturnVals ReadLastRecord(FileHandle ofh, TinyRec rec) {
-		String ch = m.GetLastChunk(ofh);
-		if (!m.ValidFileHandle(ofh)) {
+		/*if (!m.ValidFileHandle(ofh)) {
 			return FSReturnVals.BadHandle;
-		}
+		}*/
+		String ch = m.GetLastChunk(ofh);
 		if (ch == null) {
 			return FSReturnVals.RecDoesNotExist;
 		}
 		byte[] numberOfRecords = cs.readChunk(ch, 0, 4);
 		int numRecords = ByteBuffer.wrap(numberOfRecords).getInt();
 		RID recordID = new RID(ch,numRecords-1);
+		recordID.chunk=ch; 
+		recordID.slot=numRecords-1;
+		rec.ID=recordID; 
+		
 		rec.setRID(recordID);
-		byte[] recordOffset = cs.readChunk(ch, 4096-4*numRecords, 4);
+		
+		byte[] recordOffset = cs.readChunk(ch, 4096-(4*numRecords), 4);
 		int recOffset = ByteBuffer.wrap(recordOffset).getInt();
 		byte[] recordLength = cs.readChunk(ch, recOffset, 4);
 		int recLength = ByteBuffer.wrap(recordLength).getInt();
 		byte[] payload = cs.readChunk(ch, recOffset, recLength);
 		rec.setPayload(payload);
+		rec.payload=payload;
 		if (rec.getPayload() == null || rec.getRID() == null) {
 			return FSReturnVals.Fail;
 		}
@@ -255,14 +271,66 @@ public class ClientRec {
 	 * rec1, tinyRec2) 3. ReadNextRecord(FH1, rec2, tinyRec3)
 	 */
 	public FSReturnVals ReadNextRecord(FileHandle ofh, RID pivot, TinyRec rec) {
-		String ch = m.GetLastChunk(ofh);
-		if (!m.ValidFileHandle(ofh)) {
+		/*if (!m.ValidFileHandle(ofh)) {
 			return FSReturnVals.BadHandle;
-		}
-		if (ch == null) {
+		}*/
+		String ch = pivot.getChunk();
+		if (!m.ValidChunkHandle(ofh, ch)) {
 			return FSReturnVals.RecDoesNotExist;
 		}
-		return null;
+		byte[] numberOfRecords = cs.readChunk(ch, 0, 4);
+		int numRecords = ByteBuffer.wrap(numberOfRecords).getInt();
+		if (pivot.getSlot()+1 > numRecords) {
+			return FSReturnVals.RecDoesNotExist;
+		}
+		if (pivot.getSlot()+1 == numRecords) {	// if pivot is the last record
+			String nextChunk = m.GetNextChunk(ofh, ch);    
+			if (nextChunk == null) {
+				return FSReturnVals.RecDoesNotExist;
+			}
+			byte[] numberOfRecordsNextChunk = cs.readChunk(nextChunk, 0, 4);
+			int numRecordsNextChunk = ByteBuffer.wrap(numberOfRecordsNextChunk).getInt();
+			if (numRecordsNextChunk == 0) {
+				//	TODO: loop through following remaining chunks
+				//	to check if there is a valid next record
+				return FSReturnVals.RecDoesNotExist;
+			}
+			
+			RID recordID = new RID(nextChunk,0);
+			recordID.chunk=nextChunk; 
+			recordID.slot=0; 
+			byte[] recordLength = cs.readChunk(nextChunk, 8, 4);
+			int recLength = ByteBuffer.wrap(recordLength).getInt();
+			byte[] payload = cs.readChunk(nextChunk, 8, recLength);
+			rec.payload=payload;
+			rec.ID=recordID; 
+			rec.setPayload(payload);
+			rec.setRID(recordID);
+			if (rec.getPayload() == null || rec.getRID() == null) {
+				return FSReturnVals.Fail;
+			}
+			return FSReturnVals.Success;
+		}
+		int recSlot = pivot.getSlot()+1;
+		
+		RID rID = new RID(ch, recSlot);
+		rID.chunk=ch; 
+		rID.slot=recSlot;
+		rec.ID=rID; 
+		rec.setRID(rID);
+		
+		
+		byte[] recordOffset = cs.readChunk(ch, 4096-(4*(recSlot+1)), 4);
+		int recOffset = ByteBuffer.wrap(recordOffset).getInt();
+		byte[] recordLength = cs.readChunk(ch, recOffset, 4);
+		int recLength = ByteBuffer.wrap(recordLength).getInt();
+		byte[] payload = cs.readChunk(ch, recOffset, recLength);
+		rec.setPayload(payload);
+		rec.payload=payload;
+		if (rec.getPayload() == null || rec.getRID() == null) {
+			return FSReturnVals.Fail;
+		}
+		return FSReturnVals.Success;
 	}
 
 	/**
@@ -274,7 +342,68 @@ public class ClientRec {
 	 * recn-1, tinyRec2) 3. ReadPrevRecord(FH1, recn-2, tinyRec3)
 	 */
 	public FSReturnVals ReadPrevRecord(FileHandle ofh, RID pivot, TinyRec rec) {
-		return null;
+		/*if (!m.ValidFileHandle(ofh)) {
+			return FSReturnVals.BadHandle;
+		}*/
+		String ch = pivot.getChunk();
+		if (!m.ValidChunkHandle(ofh, ch)) {
+			return FSReturnVals.RecDoesNotExist;
+		}
+		byte[] numberOfRecords = cs.readChunk(ch, 0, 4);
+		int numRecords = ByteBuffer.wrap(numberOfRecords).getInt();
+		if (pivot.getSlot()+1 > numRecords) {
+			return FSReturnVals.RecDoesNotExist;
+		}
+		if (pivot.getSlot() == 0) {	// if pivot is first record in chunk
+			String previousChunk = m.GetPreviousChunk(ofh, ch);
+			if (previousChunk == null) {
+				return FSReturnVals.RecDoesNotExist;
+			}
+			byte[] numberOfRecordsPrevChunk = cs.readChunk(previousChunk, 0, 4);
+			int numRecordsPrevChunk = ByteBuffer.wrap(numberOfRecordsPrevChunk).getInt();
+			if (numRecordsPrevChunk == 0) {
+				//	TODO: loop backwards through previous remaining chunks
+				//	to check if there is a valid previous record
+				return FSReturnVals.RecDoesNotExist;
+			}
+			
+			RID recordID = new RID(previousChunk, numRecordsPrevChunk-1);
+			recordID.chunk=previousChunk; 
+			recordID.slot=numRecordsPrevChunk-1; 
+			rec. ID=recordID; 
+			rec.setRID(recordID);
+			
+			byte[] recordOffset = cs.readChunk(previousChunk, 4096-(4*numRecordsPrevChunk), 4);
+			int recOffset = ByteBuffer.wrap(recordOffset).getInt();
+			byte[] recordLength = cs.readChunk(previousChunk, recOffset, 4);
+			int recLength = ByteBuffer.wrap(recordLength).getInt();
+			byte[] payload = cs.readChunk(previousChunk, recOffset, recLength);
+			rec.setPayload(payload);
+			rec.payload=payload;
+			if (rec.getPayload() == null || rec.getRID() == null) {
+				return FSReturnVals.Fail;
+			}
+			return FSReturnVals.Success;
+		}
+		int recSlot = pivot.getSlot()-1;
+		
+		RID rID = new RID(ch, recSlot);
+		rID.chunk=ch; 
+		rID.slot=recSlot; 
+		rec.setRID(rID);
+		rec.ID=rID; 
+		byte[] recordOffset = cs.readChunk(ch, 4096-(4*(recSlot+1)), 4);
+		int recOffset = ByteBuffer.wrap(recordOffset).getInt();
+		byte[] recordLength = cs.readChunk(ch, recOffset, 4);
+		int recLength = ByteBuffer.wrap(recordLength).getInt();
+		byte[] payload = cs.readChunk(ch, recOffset, recLength);
+		rec.setPayload(payload);
+		rec.payload=payload;
+		if (rec.getPayload() == null || rec.getRID() == null) {
+			return FSReturnVals.Fail;
+		}
+		return FSReturnVals.Success;
 	}
 
+//>>>>>>> branch 'master' of https://github.com/jessicashin/TinyFSPart3.git
 }
