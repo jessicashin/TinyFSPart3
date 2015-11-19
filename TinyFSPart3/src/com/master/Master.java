@@ -260,7 +260,8 @@ public class Master implements MasterInterface
 		if (vals.contains(dirname))
 		{
 			// This is supposed to be here, but it breaks
-			// running consecutive unit tests. So, instead,
+			// running consecutive unit tests (e.g. running
+			// UnitTest5 after UnitTest4). So, instead,
 			// we'll just return success (since it technically
 			// already exists anyways).
 			
