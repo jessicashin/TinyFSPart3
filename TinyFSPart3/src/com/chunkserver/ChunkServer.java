@@ -80,9 +80,12 @@ public class ChunkServer implements ChunkServerInterface {
 		try {
 			RandomAccessFile raf = new RandomAccessFile(filePath + ChunkHandle, "rw");
 			byte[] bytes = new byte[ChunkSize];
-			for (int i = 0; i < ChunkSize; ++i)
+			ByteBuffer buf = ByteBuffer.wrap(bytes);
+			buf.putInt(0);
+			buf.putInt(8);
+			while(buf.remaining() > 0)
 			{
-				bytes[i] = 0;
+				buf.putInt(0);
 			}
 			raf.write(bytes);
 			raf.close();
