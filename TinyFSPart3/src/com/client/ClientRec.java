@@ -55,7 +55,8 @@ public class ClientRec {
 		if ((numOfRecords == null)
 				|| (ByteBuffer.wrap(numOfRecords).getInt() == 0)) {
 			// /append a new record to a empty file
-
+			RecordID.chunk=this.lastChunk(ofh);
+			RecordID.slot=0;
 			byte[] numRec = ByteBuffer.allocate(4).putInt(1).array();
 			success = cs.writeChunk(this.lastChunk(ofh), numRec, 0);
 			if (!success) {
@@ -93,6 +94,8 @@ public class ClientRec {
 		} else {
 			// /has at least one record in the chunk
 			int numRec = ByteBuffer.wrap(numOfRecords).getInt();
+			RecordID.chunk=this.lastChunk(ofh);
+			RecordID.slot=numRec;
 			byte[] previousOffset = cs.readChunk(this.lastChunk(ofh),
 					4096 - numRec * 4, 4);
 			int previous_offset = ByteBuffer.wrap(previousOffset).getInt();
@@ -127,7 +130,7 @@ public class ClientRec {
 				return FSReturnVals.Fail;
 			}
 
-			// /write next offset address to the end
+			///write next offset address to the end
 			byte[] nextOffset = ByteBuffer.allocate(4).putInt(next_empty)
 					.array();
 			if (next_empty + 4 + payload.length > (4096 - numRec * 4)) {
@@ -138,8 +141,10 @@ public class ClientRec {
 			if (!success) {
 				return FSReturnVals.Fail;
 			}
-			RecordID= new RID(this.lastChunk(ofh), next_empty);
-			// //update next empty
+			//???
+			//RecordID= new RID(this.lastChunk(ofh), next_empty);
+			 
+			////update next empty
 			next_empty = next_empty + 4 + payload.length;
 			nextEmpty = ByteBuffer.allocate(4).putInt(next_empty).array();
 			success = cs.writeChunk(this.lastChunk(ofh), nextEmpty, 4);
@@ -250,6 +255,13 @@ public class ClientRec {
 	 * rec1, tinyRec2) 3. ReadNextRecord(FH1, rec2, tinyRec3)
 	 */
 	public FSReturnVals ReadNextRecord(FileHandle ofh, RID pivot, TinyRec rec) {
+		String ch = m.GetLastChunk(ofh);
+		if (!m.ValidFileHandle(ofh)) {
+			return FSReturnVals.BadHandle;
+		}
+		if (ch == null) {
+			return FSReturnVals.RecDoesNotExist;
+		}
 		return null;
 	}
 
