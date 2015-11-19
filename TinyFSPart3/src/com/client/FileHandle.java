@@ -1,10 +1,12 @@
 package com.client;
 
-public class FileHandle {
+import java.io.Serializable;
+
+public class FileHandle implements Serializable {
 	final static String root = "csci485";
-	String directory;
-	String filename;
-	String handle;
+	public String directory;
+	public String filename;
+	public String handle;
 	
 	public FileHandle() {
 		directory = null;
