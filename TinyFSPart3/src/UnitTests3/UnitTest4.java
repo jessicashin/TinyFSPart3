@@ -36,7 +36,7 @@ public class UnitTest4 {
 		//get the file handle first
 		FileHandle fh = new FileHandle();
 		FSReturnVals ofd = cfs.OpenFile("/" + dir1 + "/emp", fh);
-		fh= new FileHandle("/"+dir1, "emp"); 
+		fh= new FileHandle("/"+dir1, "emp");
 		System.out.println(fh.get()+"in unit test 4"+fh.getDirectory());
 		byte[] payload = null;
 		int intSize = Integer.SIZE / Byte.SIZE;	// 4 bytes
