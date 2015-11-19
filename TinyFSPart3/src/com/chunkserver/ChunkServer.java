@@ -11,11 +11,19 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.concurrent.ExecutionException;
 //import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
 
 import com.client.Client;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.interfaces.ChunkServerInterface;
 import com.network.Network;
+import com.sun.corba.se.impl.oa.poa.ActiveObjectMap.Key;
+import com.sun.corba.se.impl.orbutil.graph.Graph;
 
 /**
  * implementation of interfaces at the chunkserver side
@@ -41,6 +49,8 @@ public class ChunkServer implements ChunkServerInterface {
 	//Replies provided by the server
 	public static final int TRUE = 1;
 	public static final int FALSE = 0;
+	
+	private LoadingCache<String, LinkedList<String>> cachedData;
 	
 	/**
 	 * Initialize the chunk server
@@ -108,6 +118,25 @@ public class ChunkServer implements ChunkServerInterface {
 			ex.printStackTrace();
 			return null;
 		}
+	}
+	
+	@SuppressWarnings("unused")
+	private void cacheData(final LinkedList<String> cacheMe) {
+		LoadingCache<String, LinkedList<String>> cd = CacheBuilder.newBuilder()
+			.maximumSize(100)
+			.expireAfterWrite(60, TimeUnit.SECONDS)
+			.build(
+				new CacheLoader<String, LinkedList<String>>() {
+					public LinkedList<String> load(String str) throws Exception {
+			    		return cacheMe;
+			    	}
+			    });
+		this.cachedData=cd;
+		return;
+	}
+	@SuppressWarnings("unused")
+	private LinkedList<String> getCachedData(String str) throws Exception{
+		return this.cachedData.get(str);
 	}
 	
 	public static void ReadAndProcessRequests()
