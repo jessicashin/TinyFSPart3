@@ -5,6 +5,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
+import com.client.FileHandle;
 import com.network.Network;
 
 public class MasterThread extends Thread {
@@ -219,7 +220,22 @@ public class MasterThread extends Thread {
 	
 	private void HandleReqOpenFile()
 	{
+		int length = Network.ReadIntFromInputStream("Master", readInput);
+		byte[] bytes = Network.RecvPayload("Master", readInput, length);
+		String FilePath = (new String(bytes)).toString();
 		
+		length = Network.ReadIntFromInputStream("Master", readInput);
+		bytes = Network.RecvPayload("Master", readInput, length);
+		String handle = (new String(bytes)).toString();
+		
+		int result = master.OpenFile(FilePath, handle);
+		
+		try {
+			writeOutput.writeInt(result);
+			writeOutput.flush();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	private void HandleReqCloseFile()

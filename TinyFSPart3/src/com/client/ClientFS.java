@@ -282,26 +282,24 @@ public class ClientFS {
 	 *
 	 * Example usage: OpenFile("/Shahram/CSCI485/Lecture1/Intro.pptx")
 	 */
-	public  FSReturnVals OpenFile(String FilePath, FileHandle ofh) {
-		///System.out.println("openfile:"+FilePath); 
-		int count = FilePath.length() - FilePath.replace("/", "").length();
-		if (count<1){
-		return FSReturnVals.BadHandle; 	
-		}else if (count==1){
-			ofh.directory="/"; 
-			ofh.filename=FilePath.substring(1, FilePath.length());
-			ofh.handle=FilePath; 
-		}else {
-			int lastSlash=FilePath.lastIndexOf('/'); 
-			ofh.directory=FilePath.substring(0, lastSlash); 
-			ofh.filename=FilePath.substring(lastSlash+1, FilePath.length()); 
-			ofh.setDirectory(FilePath.substring(0, lastSlash));
-			ofh.setFilename(FilePath.substring(lastSlash+1, FilePath.length()));
-			ofh.handle=FilePath; 
+	public FSReturnVals OpenFile(String FilePath, FileHandle ofh) {
+		try {
+			Client.WriteOutput.writeInt(Master.ReqOpenFile);
+			
+			Client.WriteOutput.writeInt(FilePath.length());
+			Client.WriteOutput.write(FilePath.getBytes());
+			Client.WriteOutput.writeInt(ofh.get().length());
+			Client.WriteOutput.write(ofh.get().getBytes());
+			
+			int result = Network.ReadIntFromInputStream("ClientFS", Client.ReadInput);
+			if(result==MasterInterface.Success) {
+				ofh.handle=FilePath;
+			}
+			return TranslateMasterRetVal(result);
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
-		//System.out.println(ofh.get()+" "+ofh.getDirectory()+" "+ofh.getFilename()); 
-		return TranslateMasterRetVal(MasterInterface.Success);
-		
+		return TranslateMasterRetVal(MasterInterface.Fail);
 	}
 
 	/**
@@ -311,6 +309,25 @@ public class ClientFS {
 	 * Example usage: CloseFile(FH1)
 	 */
 	public FSReturnVals CloseFile(FileHandle ofh) {
+		try {
+			Client.WriteOutput.writeInt(Master.ReqCloseFile);
+			Client.WriteOutput.writeInt(1);
+			Client.WriteOutput.writeObject(ofh);
+			
+//			Client.WriteOutput.writeInt(ofh.getDirectory().length());
+//			Client.WriteOutput.write(ofh.getDirectory().getBytes());
+//			
+//			Client.WriteOutput.writeInt(ofh.getFilename().length());
+//			Client.WriteOutput.write(ofh.getFilename().getBytes());
+//			
+//			Client.WriteOutput.writeInt(ofh.get().length());
+//			Client.WriteOutput.write(ofh.get().getBytes());
+			
+			int result = Network.ReadIntFromInputStream("ClientFS", Client.ReadInput);
+			return TranslateMasterRetVal(result);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		return TranslateMasterRetVal(MasterInterface.Fail);
 	}
 

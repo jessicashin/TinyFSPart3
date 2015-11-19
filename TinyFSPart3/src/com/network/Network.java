@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.nio.ByteBuffer;
 
+import com.client.FileHandle;
+
 public class Network {
 	public static byte[] RecvPayload(String caller, ObjectInputStream instream, int sz){
 		byte[] tmpbuf = new byte[sz];
@@ -37,4 +39,20 @@ public class Network {
 			PayloadSize = ByteBuffer.wrap(InputBuff).getInt();
 		return PayloadSize;
 	}
+	
+//	public static FileHandle ReadFileHandleFromInputStream(String caller, ObjectInputStream instream) {
+//		FileHandle fh = new FileHandle();
+//		try {
+//			if(null==instream.readObject()){System.out.println("YO");}
+//			Object obj = instream.readObject();
+//			fh = (FileHandle) obj;
+//		} catch (ClassNotFoundException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		return fh;
+//	}
 }

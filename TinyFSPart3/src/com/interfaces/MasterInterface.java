@@ -122,7 +122,7 @@ public interface MasterInterface {
 	 *
 	 * Example usage: OpenFile("/Shahram/CSCI485/Lecture1/Intro.pptx")
 	 */
-	public int OpenFile(String FilePath, FileHandle ofh);
+	public int OpenFile(String FilePath, String handle);
 
 	/**
 	 * Closes the specified file handle Returns BadHandle if ofh is invalid
