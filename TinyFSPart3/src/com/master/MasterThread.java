@@ -67,8 +67,24 @@ public class MasterThread extends Thread {
 						HandleReqCloseFile();
 						break;
 						
-					case Master.ReqAppendRecord:
-						HandleReqAppendRecord();
+					case Master.ReqAppendChunk:
+						HandleReqAppendChunk();
+						break;
+						
+					case Master.ReqGetFirstChunk:
+						HandleReqGetFirstChunk();
+						break;
+						
+					case Master.ReqGetLastChunk:
+						HandleReqGetLastChunk();
+						break;
+						
+					case Master.ReqGetNextChunk:
+						HandleReqGetNextChunk();
+						break;
+						
+					case Master.ReqGetPreviousChunk:
+						HandleReqGetPreviousChunk();
 						break;
 	
 					default:
@@ -228,11 +244,7 @@ public class MasterThread extends Thread {
 		byte[] bytes = Network.RecvPayload("Master", readInput, length);
 		String FilePath = (new String(bytes)).toString();
 		
-		length = Network.ReadIntFromInputStream("Master", readInput);
-		bytes = Network.RecvPayload("Master", readInput, length);
-		String handle = (new String(bytes)).toString();
-		
-		int result = master.OpenFile(FilePath, handle);
+		int result = master.OpenFile(FilePath);
 		
 		try {
 			writeOutput.writeInt(result);
@@ -258,7 +270,136 @@ public class MasterThread extends Thread {
 		}
 	}
 	
-	private void HandleReqAppendRecord() {
+	private void HandleReqAppendChunk()
+	{
+		int length = Network.ReadIntFromInputStream("Master", readInput);
+		byte[] bytes = Network.RecvPayload("Master", readInput, length);
+		String file = (new String(bytes)).toString();
 		
+		String result = master.AppendChunk(new FileHandle(file));
+		
+		try {
+			if (result == null)
+			{
+				writeOutput.writeInt(-1);
+			}
+			else
+			{
+				byte[] resultBytes = result.getBytes();
+				writeOutput.writeInt(resultBytes.length);
+				writeOutput.write(resultBytes);
+			}
+			writeOutput.flush();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private void HandleReqGetFirstChunk()
+	{
+		int length = Network.ReadIntFromInputStream("Master", readInput);
+		byte[] bytes = Network.RecvPayload("Master", readInput, length);
+		String file = (new String(bytes)).toString();
+		
+		String result = master.GetFirstChunk(new FileHandle(file));
+		
+		try {
+			if (result == null)
+			{
+				writeOutput.writeInt(-1);
+			}
+			else
+			{
+				byte[] resultBytes = result.getBytes();
+				writeOutput.writeInt(resultBytes.length);
+				writeOutput.write(resultBytes);
+			}
+			writeOutput.flush();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private void HandleReqGetLastChunk()
+	{
+		int length = Network.ReadIntFromInputStream("Master", readInput);
+		byte[] bytes = Network.RecvPayload("Master", readInput, length);
+		String file = (new String(bytes)).toString();
+		
+		String result = master.GetLastChunk(new FileHandle(file));
+		
+		try {
+			if (result == null)
+			{
+				writeOutput.writeInt(-1);
+			}
+			else
+			{
+				byte[] resultBytes = result.getBytes();
+				writeOutput.writeInt(resultBytes.length);
+				writeOutput.write(resultBytes);
+			}
+			writeOutput.flush();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private void HandleReqGetNextChunk()
+	{
+		int length = Network.ReadIntFromInputStream("Master", readInput);
+		byte[] bytes = Network.RecvPayload("Master", readInput, length);
+		String file = (new String(bytes)).toString();
+		
+		length = Network.ReadIntFromInputStream("Master", readInput);
+		bytes = Network.RecvPayload("Master", readInput, length);
+		String chunk = (new String(bytes)).toString();
+		
+		String result = master.GetNextChunk(new FileHandle(file), chunk);
+		
+		try {
+			if (result == null)
+			{
+				writeOutput.writeInt(-1);
+			}
+			else
+			{
+				byte[] resultBytes = result.getBytes();
+				writeOutput.writeInt(resultBytes.length);
+				writeOutput.write(resultBytes);
+			}
+			writeOutput.flush();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private void HandleReqGetPreviousChunk()
+	{
+		int length = Network.ReadIntFromInputStream("Master", readInput);
+		byte[] bytes = Network.RecvPayload("Master", readInput, length);
+		String file = (new String(bytes)).toString();
+		
+		length = Network.ReadIntFromInputStream("Master", readInput);
+		bytes = Network.RecvPayload("Master", readInput, length);
+		String chunk = (new String(bytes)).toString();
+		
+		String result = master.GetPreviousChunk(new FileHandle(file), chunk);
+		
+		try {
+			if (result == null)
+			{
+				writeOutput.writeInt(-1);
+			}
+			else
+			{
+				byte[] resultBytes = result.getBytes();
+				writeOutput.writeInt(resultBytes.length);
+				writeOutput.write(resultBytes);
+			}
+			writeOutput.flush();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 }

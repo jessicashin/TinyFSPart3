@@ -51,6 +51,10 @@ public class ChunkServer implements ChunkServerInterface {
 	public static final int TRUE = 1;
 	public static final int FALSE = 0;
 	
+	// Chunk Server Location
+	public static final String ChunkServerIpAddr = "127.0.0.1";
+	public static final int ChunkServerPort = 9643;
+	
 	private LoadingCache<String, LinkedList<String>> cachedData;
 	
 	/**

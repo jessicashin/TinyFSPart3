@@ -1,10 +1,9 @@
 package com.interfaces;
 
 import com.client.FileHandle;
-import com.client.RID;
 
-public interface MasterInterface {
-	
+public interface MasterInterface
+{
 	// FSReturnVals
 	public static final int DirExists			= 1;	// Returned by CreateDir when directory exists
 	public static final int	DirNotEmpty			= 2;	// Returned when a non-empty directory is deleted
@@ -25,11 +24,17 @@ public interface MasterInterface {
 	public static final int ReqDeleteDir		= 102;
 	public static final int ReqRenameDir		= 103;
 	public static final int ReqListDir			= 104;
+	
 	public static final int ReqCreateFile		= 105;
 	public static final int ReqDeleteFile		= 106;
 	public static final int ReqOpenFile			= 107;
 	public static final int ReqCloseFile		= 108;
-	public static final int ReqAppendRecord		= 109;
+	
+	public static final int ReqAppendChunk		= 109;
+	public static final int ReqGetFirstChunk	= 110;
+	public static final int ReqGetLastChunk		= 111;
+	public static final int ReqGetNextChunk		= 112;
+	public static final int ReqGetPreviousChunk	= 113;
 	
 	// Master Location
 	public static final String MasterIpAddr = "127.0.0.1";
@@ -124,15 +129,12 @@ public interface MasterInterface {
 	 *
 	 * Example usage: OpenFile("/Shahram/CSCI485/Lecture1/Intro.pptx")
 	 */
-	public int OpenFile(String FilePath, String handle);
+	public int OpenFile(String FilePath);
 
 	/**
 	 * Closes the specified file handle Returns BadHandle if ofh is invalid
 	 *
 	 * Example usage: CloseFile(FH1)
 	 */
-//	public int CloseFile(FileHandle ofh);
 	public int CloseFile(String FilePath);
-	
-	public int AppendRecord(FileHandle ofh, byte[] payload, RID RecordID);
 }

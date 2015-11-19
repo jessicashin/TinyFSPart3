@@ -8,11 +8,19 @@ import java.util.LinkedList;
 
 import com.chunkserver.ChunkServer;
 import com.client.ClientFS.FSReturnVals;
+import com.interfaces.MasterInterface;
 import com.master.Master;
+import com.network.Network;
 
 public class ClientRec {
 
 	ChunkServer cs = new ChunkServer();
+	
+	Client client = null;
+	
+	public ClientRec() {
+		client = new Client();
+	}
 	
 	/**
 	 * Appends a record to the open file as specified by ofh Returns BadHandle
@@ -31,18 +39,18 @@ public class ClientRec {
 		{
 			return FSReturnVals.RecordTooLong;
 		}
-		
-		if (!Master.get().ValidFileHandle(ofh))
+		/*
+		if (!ValidFileHandle(ofh))
 		{
 			return FSReturnVals.BadHandle;
 		}
-		
-		if(Master.get().GetLastChunk(ofh) == null)
+		*/
+		if(GetLastChunk(ofh) == null)
 		{
-			cs.createChunk(Master.get().AppendChunk(ofh));
+			cs.createChunk(AppendChunk(ofh));
 		}
 		
-		RecordID.chunk = Master.get().GetLastChunk(ofh);
+		RecordID.chunk = GetLastChunk(ofh);
 		
 		byte[] bytes = new byte[4];
 		
@@ -58,7 +66,7 @@ public class ClientRec {
 		// offset + record header + record slot + payload size
 		if (offset + 4 + 4 + payload.length > ((ChunkServer.ChunkSize - 4) - (RecordID.slot * 4)))
 		{
-			RecordID.chunk = Master.get().AppendChunk(ofh);
+			RecordID.chunk = AppendChunk(ofh);
 			cs.createChunk(RecordID.chunk);
 			RecordID.slot = 0;
 			offset = 8;
@@ -100,12 +108,12 @@ public class ClientRec {
 		{
 			return FSReturnVals.BadRecID;
 		}
-		
-		if (!Master.get().ValidFileHandle(ofh))
+		/*
+		if (!ValidFileHandle(ofh))
 		{
 			return FSReturnVals.BadHandle;
 		}
-		
+		*/
 		cs.writeChunk(
 				RecordID.chunk,
 				ByteBuffer.allocate(4).putInt(-1).array(),
@@ -122,12 +130,13 @@ public class ClientRec {
 	 */
 	public FSReturnVals ReadFirstRecord(FileHandle ofh, TinyRec rec)
 	{
-		if (!Master.get().ValidFileHandle(ofh))
+		/*
+		if (!ValidFileHandle(ofh))
 		{
 			return FSReturnVals.BadHandle;
 		}
-		
-		rec.setRID(new RID(Master.get().GetFirstChunk(ofh), -1));
+		*/
+		rec.setRID(new RID(GetFirstChunk(ofh), -1));
 		
 		while (rec.getRID().chunk != null)
 		{
@@ -151,7 +160,7 @@ public class ClientRec {
 			
 			if (offset == -1)
 			{
-				rec.getRID().chunk = Master.get().GetNextChunk(ofh, rec.getRID().chunk);
+				rec.getRID().chunk = GetNextChunk(ofh, rec.getRID().chunk);
 				continue;
 			}
 						
@@ -175,12 +184,13 @@ public class ClientRec {
 	 */
 	public FSReturnVals ReadLastRecord(FileHandle ofh, TinyRec rec)
 	{
-		if (!Master.get().ValidFileHandle(ofh))
+		/*
+		if (!ValidFileHandle(ofh))
 		{
 			return FSReturnVals.BadHandle;
 		}
-		
-		rec.setRID(new RID(Master.get().GetLastChunk(ofh), -1));
+		*/
+		rec.setRID(new RID(GetLastChunk(ofh), -1));
 		
 		while (rec.getRID().chunk != null)
 		{
@@ -204,7 +214,7 @@ public class ClientRec {
 			
 			if (offset == -1)
 			{
-				rec.getRID().chunk = Master.get().GetPreviousChunk(ofh, rec.getRID().chunk);
+				rec.getRID().chunk = GetPreviousChunk(ofh, rec.getRID().chunk);
 				continue;
 			}
 						
@@ -230,11 +240,12 @@ public class ClientRec {
 	 */
 	public FSReturnVals ReadNextRecord(FileHandle ofh, RID pivot, TinyRec rec)
 	{
-		if (!Master.get().ValidFileHandle(ofh))
+		/*
+		if (!ValidFileHandle(ofh))
 		{
 			return FSReturnVals.BadHandle;
 		}
-		
+		*/
 		rec.setRID(new RID(pivot.chunk, pivot.slot + 1));
 		
 		while (rec.getRID().chunk != null)
@@ -259,7 +270,7 @@ public class ClientRec {
 			
 			if (offset == -1)
 			{
-				rec.getRID().chunk = Master.get().GetNextChunk(ofh, rec.getRID().chunk);
+				rec.getRID().chunk = GetNextChunk(ofh, rec.getRID().chunk);
 				rec.getRID().slot = 0;
 				continue;
 			}
@@ -286,11 +297,12 @@ public class ClientRec {
 	 */
 	public FSReturnVals ReadPrevRecord(FileHandle ofh, RID pivot, TinyRec rec)
 	{
-		if (!Master.get().ValidFileHandle(ofh))
+		/*
+		if (!ValidFileHandle(ofh))
 		{
 			return FSReturnVals.BadHandle;
 		}
-		
+		*/
 		rec.setRID(new RID(pivot.chunk, pivot.slot - 1));
 		
 		while (rec.getRID().chunk != null)
@@ -312,7 +324,7 @@ public class ClientRec {
 			
 			if (offset == -1)
 			{
-				rec.getRID().chunk = Master.get().GetPreviousChunk(ofh, rec.getRID().chunk);
+				rec.getRID().chunk = GetPreviousChunk(ofh, rec.getRID().chunk);
 				
 				if (rec.getRID().chunk == null)
 				{
@@ -337,4 +349,156 @@ public class ClientRec {
 		return FSReturnVals.Fail;
 	}
 
+	
+	/**
+	 * Interface with Master.
+	 */
+	
+	private String AppendChunk(FileHandle file)
+	{
+		try {
+			Client.WriteOutput.writeInt(Master.ReqAppendChunk);
+		
+			byte[] bytes = file.handle.getBytes();
+			Client.WriteOutput.writeInt(bytes.length);
+			Client.WriteOutput.write(bytes);
+			
+			Client.WriteOutput.flush();
+			
+			int length = Network.ReadIntFromInputStream("ClientRec", Client.ReadInput);
+			if (length == -1)
+			{
+				return null;
+			}
+			byte[] resultBytes = Network.RecvPayload("ClientRec", Client.ReadInput, length);
+			String result = (new String(resultBytes)).toString();
+			
+			return result;
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return null;
+	}
+	
+	private String GetFirstChunk(FileHandle file)
+	{
+		try {
+			Client.WriteOutput.writeInt(Master.ReqGetFirstChunk);
+		
+			byte[] bytes = file.handle.getBytes();
+			Client.WriteOutput.writeInt(bytes.length);
+			Client.WriteOutput.write(bytes);
+			
+			Client.WriteOutput.flush();
+			
+			int length = Network.ReadIntFromInputStream("ClientRec", Client.ReadInput);
+			if (length == -1)
+			{
+				return null;
+			}
+			byte[] resultBytes = Network.RecvPayload("ClientRec", Client.ReadInput, length);
+			String result = (new String(resultBytes)).toString();
+			
+			return result;
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return null;
+	}
+	
+	private String GetLastChunk(FileHandle file)
+	{
+		try {
+			Client.WriteOutput.writeInt(Master.ReqGetLastChunk);
+		
+			byte[] bytes = file.handle.getBytes();
+			Client.WriteOutput.writeInt(bytes.length);
+			Client.WriteOutput.write(bytes);
+			
+			Client.WriteOutput.flush();
+			
+			int length = Network.ReadIntFromInputStream("ClientRec", Client.ReadInput);
+			if (length == -1)
+			{
+				return null;
+			}
+			byte[] resultBytes = Network.RecvPayload("ClientRec", Client.ReadInput, length);
+			String result = (new String(resultBytes)).toString();
+			
+			return result;
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return null;
+	}
+	
+	private String GetNextChunk(FileHandle file, String pivot)
+	{
+		try {
+			Client.WriteOutput.writeInt(Master.ReqGetNextChunk);
+		
+			byte[] bytes = file.handle.getBytes();
+			Client.WriteOutput.writeInt(bytes.length);
+			Client.WriteOutput.write(bytes);
+			
+			bytes = pivot.getBytes();
+			Client.WriteOutput.writeInt(bytes.length);
+			Client.WriteOutput.write(bytes);
+			
+			Client.WriteOutput.flush();
+			
+			int length = Network.ReadIntFromInputStream("ClientRec", Client.ReadInput);
+			if (length == -1)
+			{
+				return null;
+			}
+			byte[] resultBytes = Network.RecvPayload("ClientRec", Client.ReadInput, length);
+			String result = (new String(resultBytes)).toString();
+			
+			return result;
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return null;
+	}
+	
+	private String GetPreviousChunk(FileHandle file, String pivot)
+	{
+		try {
+			Client.WriteOutput.writeInt(Master.ReqGetPreviousChunk);
+		
+			byte[] bytes = file.handle.getBytes();
+			Client.WriteOutput.writeInt(bytes.length);
+			Client.WriteOutput.write(bytes);
+			
+			bytes = pivot.getBytes();
+			Client.WriteOutput.writeInt(bytes.length);
+			Client.WriteOutput.write(bytes);
+			
+			Client.WriteOutput.flush();
+			
+			int length = Network.ReadIntFromInputStream("ClientRec", Client.ReadInput);
+			if (length == -1)
+			{
+				return null;
+			}
+			byte[] resultBytes = Network.RecvPayload("ClientRec", Client.ReadInput, length);
+			String result = (new String(resultBytes)).toString();
+			
+			return result;
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return null;
+	}
 }
