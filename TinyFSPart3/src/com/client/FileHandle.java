@@ -34,10 +34,4 @@ public class FileHandle implements Serializable {
 		int slash = handle.lastIndexOf("/");
 		return handle.substring(slash + 1, handle.length());
 	}
-	public void setDirectory(String dir){
-		this.directory=dir; 
-	}
-	public void setFilename (String  filename){
-		this.filename=filename; 
-	}
 }

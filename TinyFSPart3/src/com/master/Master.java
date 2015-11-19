@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
 import com.client.ClientFS.FSReturnVals;
@@ -188,6 +189,11 @@ public class Master implements MasterInterface
 		LinkedList<String> chunks = files.get(file.get());
 		
 		if (chunks == null)
+		{
+			return null;
+		}
+		
+		if (chunks.isEmpty())
 		{
 			return null;
 		}
@@ -408,6 +414,7 @@ public class Master implements MasterInterface
 		}
 		
 		vals.add(filename);
+		files.put(tgtdir + "/" + filename, new LinkedList<String>());
 		
 		return Success;
 	}
@@ -429,6 +436,7 @@ public class Master implements MasterInterface
 		}
 		
 		vals.remove(filename);
+		files.remove(tgtdir + "/" + filename);
 		
 		return Success;
 	}
