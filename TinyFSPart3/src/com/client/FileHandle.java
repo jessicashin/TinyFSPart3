@@ -4,9 +4,13 @@ import java.io.Serializable;
 
 public class FileHandle implements Serializable {
 	public String handle;
-	
+	public String directory; 
+	public String filename; 
 	public FileHandle() {
 		handle = null;
+		directory =null; 
+		filename=null; 
+		
 	}
 	
 	public FileHandle(String tgtdir, String fn) {
