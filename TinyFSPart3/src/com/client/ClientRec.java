@@ -26,7 +26,7 @@ public class ClientRec {
 			FileHandle ofh,
 			byte[] payload,
 			RID RecordID)
-	{
+	{		
 		if (payload.length > ChunkServer.ChunkSize)
 		{
 			return FSReturnVals.RecordTooLong;
@@ -241,14 +241,14 @@ public class ClientRec {
 		{
 			byte[] bytes = new byte[4];
 			
-			bytes = cs.readChunk(pivot.chunk, 0, 4);
+			bytes = cs.readChunk(rec.getRID().chunk, 0, 4);
 			int count = ByteBuffer.wrap(bytes).getInt();
 			
 			int offset = -1;
 			
 			for (int i = rec.getRID().slot; i < count; ++i)
 			{
-				bytes = cs.readChunk(pivot.chunk, (ChunkServer.ChunkSize - 4) - (i * 4), 4);
+				bytes = cs.readChunk(rec.getRID().chunk, (ChunkServer.ChunkSize - 4) - (i * 4), 4);
 				offset = ByteBuffer.wrap(bytes).getInt();
 				if (offset != -1)
 				{
@@ -301,7 +301,7 @@ public class ClientRec {
 			
 			for (int i = rec.getRID().slot; i >= 0; --i)
 			{
-				bytes = cs.readChunk(pivot.chunk, (ChunkServer.ChunkSize - 4) - (i * 4), 4);
+				bytes = cs.readChunk(rec.getRID().chunk, (ChunkServer.ChunkSize - 4) - (i * 4), 4);
 				offset = ByteBuffer.wrap(bytes).getInt();
 				if (offset != -1)
 				{

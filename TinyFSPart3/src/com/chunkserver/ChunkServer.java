@@ -85,7 +85,7 @@ public class ChunkServer implements ChunkServerInterface {
 			buf.putInt(8);
 			while(buf.remaining() > 0)
 			{
-				buf.putInt(0);
+				buf.putInt(-1);
 			}
 			raf.write(bytes);
 			raf.close();
