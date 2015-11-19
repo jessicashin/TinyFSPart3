@@ -1,8 +1,8 @@
 package com.client;
 
 public class RID {
-	String chunk;
-	int slot;
+	private String chunk;
+	private int slot;
 	
 	public RID() {
 		chunk = null;
@@ -11,5 +11,13 @@ public class RID {
 	public RID(String chunkHandle, int slotNumber) {
 		chunk = chunkHandle;
 		slot = slotNumber;
+	}
+	
+	public int getSlot() {
+		return slot;
+	}
+	
+	public String getChunk() {
+		return chunk;
 	}
 }

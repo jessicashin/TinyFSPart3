@@ -126,6 +126,15 @@ public class Master implements MasterInterface
 		return false;
 	}
 	
+	public synchronized boolean ValidChunkHandle(FileHandle file, String chunk) {
+		LinkedList<String> chunks = files.get(file.get());
+		if (chunks.contains(chunk)) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
 	public synchronized String AppendChunk(FileHandle file)
 	{
 		LinkedList<String> chunks = files.get(file.get());
