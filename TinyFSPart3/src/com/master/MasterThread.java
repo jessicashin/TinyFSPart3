@@ -66,6 +66,10 @@ public class MasterThread extends Thread {
 					case Master.ReqCloseFile:
 						HandleReqCloseFile();
 						break;
+						
+					case Master.ReqAppendRecord:
+						HandleReqAppendRecord();
+						break;
 	
 					default:
 						System.out.println("Error in Master: Specified Request ID "+reqId+" is not recognized.");
@@ -240,6 +244,21 @@ public class MasterThread extends Thread {
 	
 	private void HandleReqCloseFile()
 	{
+		int length = Network.ReadIntFromInputStream("Master", readInput);
+		byte[] bytes = Network.RecvPayload("Master", readInput, length);
+		String FilePath = (new String(bytes)).toString();
+		
+		int result = master.CloseFile(FilePath);
+		
+		try {
+			writeOutput.writeInt(result);
+			writeOutput.flush();
+		} catch(IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private void HandleReqAppendRecord() {
 		
 	}
 }

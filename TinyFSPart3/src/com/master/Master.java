@@ -16,6 +16,7 @@ import java.util.Set;
 
 import com.client.ClientFS.FSReturnVals;
 import com.client.FileHandle;
+import com.client.RID;
 import com.interfaces.MasterInterface;
 
 public class Master implements MasterInterface
@@ -443,6 +444,7 @@ public class Master implements MasterInterface
 
 	public synchronized int OpenFile(String FilePath, String handle)
 	{
+		/*
 		int count = FilePath.length() - FilePath.replace("/", "").length();
 		if(count<1) {
 			return BadHandle;
@@ -452,7 +454,7 @@ public class Master implements MasterInterface
 //			ofh.filename=FilePath.substring(1, FilePath.length());
 //			ofh.handle=FilePath; 
 			return FileDoesNotExist;
-		} else {
+		} else {*/
 //			int lastSlash=FilePath.lastIndexOf('/'); 
 			//ofh= new FileHandle (FilePath.substring(0, lastSlash), FilePath.substring(lastSlash+1, FilePath.length())); 
 //			handle=FilePath;
@@ -461,11 +463,11 @@ public class Master implements MasterInterface
 //			ofh.setDirectory(FilePath.substring(0, lastSlash));
 //			ofh.setFilename(FilePath.substring(lastSlash+1, FilePath.length()));
 //			ofh.handle=FilePath;
-			if(namespace.containsKey(FilePath))
+			if(files.containsKey(FilePath))
 				return Success;
 			else
 				return FileDoesNotExist;
-		}
+		//}
 
 //		System.out.println(ofh.get()+" "+ofh.getDirectory()+" "+ofh.getFilename());
 		
@@ -478,9 +480,37 @@ public class Master implements MasterInterface
 //		return Success;
 	}
 
-	public synchronized int CloseFile(FileHandle ofh)
+	public synchronized int CloseFile(String FilePath)
 	{
-		return 0;
+//		String FilePath=ofh.get();
+		int count = FilePath.length() - FilePath.replace("/", "").length();
+		if(count<1) {
+			return BadHandle;
+		} else if(count==1) {
+			return FileDoesNotExist;
+		} else {
+			if(namespace.containsKey(FilePath))
+				return Success;
+			else
+				return FileDoesNotExist;
+		}
+	}
+	
+	public int AppendRecord(FileHandle ofh, byte[] payload, RID RecordID) {
+		String FilePath=ofh.get();
+		int count = FilePath.length() - FilePath.replace("/", "").length();
+		if(count<1) {
+			return BadHandle;
+		} else if(count==1) {
+			return FileDoesNotExist;
+		} else {
+			if(namespace.containsKey(FilePath)) {
+				//implement appendRecord functionality
+				return Success;
+			} else {
+				return FileDoesNotExist;
+			}
+		}
 	}
 	
 	private synchronized String SanitizeStr(String src)

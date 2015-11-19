@@ -1,6 +1,7 @@
 package com.chunkserver;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -55,7 +56,7 @@ public class ChunkServer implements ChunkServerInterface {
 	/**
 	 * Initialize the chunk server
 	 */
-	public ChunkServer(){
+	public ChunkServer() {
 		File dir = new File(filePath);
 		File[] fs = dir.listFiles();
 
@@ -75,9 +76,23 @@ public class ChunkServer implements ChunkServerInterface {
 	 * Each chunk is corresponding to a file.
 	 * Return the chunk handle of the last chunk in the file.
 	 */
-	public String createChunk() {
-		counter++;
-		return String.valueOf(counter);
+	public void createChunk(String ChunkHandle) {
+		try {
+			RandomAccessFile raf = new RandomAccessFile(filePath + ChunkHandle, "rw");
+			byte[] bytes = new byte[ChunkSize];
+			ByteBuffer buf = ByteBuffer.wrap(bytes);
+			buf.putInt(0);
+			buf.putInt(8);
+			while(buf.remaining() > 0)
+			{
+				buf.putInt(0);
+			}
+			raf.write(bytes);
+			raf.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	/**
@@ -178,11 +193,13 @@ public class ChunkServer implements ChunkServerInterface {
 					int CMD = Network.ReadIntFromInputStream("ChunkServer", ReadInput);
 					switch (CMD){
 					case CreateChunkCMD:
+						/*
 						String chunkhandle = cs.createChunk();
 						byte[] CHinbytes = chunkhandle.getBytes();
 						WriteOutput.writeInt(ChunkServer.PayloadSZ + CHinbytes.length);
 						WriteOutput.write(CHinbytes);
 						WriteOutput.flush();
+						*/
 						break;
 
 					case ReadChunkCMD:

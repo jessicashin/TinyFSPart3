@@ -1,6 +1,7 @@
 package com.interfaces;
 
 import com.client.FileHandle;
+import com.client.RID;
 
 public interface MasterInterface {
 	
@@ -28,6 +29,7 @@ public interface MasterInterface {
 	public static final int ReqDeleteFile		= 106;
 	public static final int ReqOpenFile			= 107;
 	public static final int ReqCloseFile		= 108;
+	public static final int ReqAppendRecord		= 109;
 	
 	// Master Location
 	public static final String MasterIpAddr = "127.0.0.1";
@@ -129,5 +131,8 @@ public interface MasterInterface {
 	 *
 	 * Example usage: CloseFile(FH1)
 	 */
-	public int CloseFile(FileHandle ofh);
+//	public int CloseFile(FileHandle ofh);
+	public int CloseFile(String FilePath);
+	
+	public int AppendRecord(FileHandle ofh, byte[] payload, RID RecordID);
 }
