@@ -120,7 +120,6 @@ public class ClientRec {
 	 *
 	 * Example usage: ReadFirstRecord(FH1, tinyRec)
 	 */
-
 	public FSReturnVals ReadFirstRecord(FileHandle ofh, TinyRec rec)
 	{
 		if (!Master.get().ValidFileHandle(ofh))
@@ -162,9 +161,9 @@ public class ClientRec {
 			rec.setPayload(cs.readChunk(rec.getRID().chunk, offset + 4, size));
 			
 			return FSReturnVals.Success;
-
 		}
 		
+		rec.setRID(null);
 		return FSReturnVals.Fail;
 	}
 
@@ -180,7 +179,6 @@ public class ClientRec {
 		{
 			return FSReturnVals.BadHandle;
 		}
-
 		
 		rec.setRID(new RID(Master.get().GetLastChunk(ofh), -1));
 		
@@ -216,9 +214,9 @@ public class ClientRec {
 			rec.setPayload(cs.readChunk(rec.getRID().chunk, offset + 4, size));
 			
 			return FSReturnVals.Success;
-
 		}
 		
+		rec.setRID(null);
 		return FSReturnVals.Fail;
 	}
 
@@ -258,18 +256,12 @@ public class ClientRec {
 					break;
 				}
 			}
-
+			
 			if (offset == -1)
 			{
 				rec.getRID().chunk = Master.get().GetNextChunk(ofh, rec.getRID().chunk);
-				if (rec.getRID().chunk == null)
-				{
-					rec.setRID(null);
-					return FSReturnVals.Fail;
-				}
 				rec.getRID().slot = 0;
 				continue;
-
 			}
 					
 			bytes = cs.readChunk(rec.getRID().chunk, offset, 4);
@@ -280,7 +272,7 @@ public class ClientRec {
 			return FSReturnVals.Success;
 		}
 		
-
+		rec.setRID(null);
 		return FSReturnVals.Fail;
 	}
 
@@ -305,9 +297,6 @@ public class ClientRec {
 		{
 			byte[] bytes = new byte[4];
 			
-			bytes = cs.readChunk(pivot.chunk, 0, 4);
-			int count = ByteBuffer.wrap(bytes).getInt();
-			
 			int offset = -1;
 			
 			for (int i = rec.getRID().slot; i >= 0; --i)
@@ -321,19 +310,19 @@ public class ClientRec {
 				}
 			}
 			
-
 			if (offset == -1)
 			{
 				rec.getRID().chunk = Master.get().GetPreviousChunk(ofh, rec.getRID().chunk);
+				
 				if (rec.getRID().chunk == null)
 				{
-					rec.setRID(null);
-					return FSReturnVals.Fail;
+					break;
 				}
+				
 				bytes = cs.readChunk(rec.getRID().chunk, 0, 4);
-				rec.getRID().slot = ByteBuffer.wrap(bytes).getInt();
+				rec.getRID().slot = ByteBuffer.wrap(bytes).getInt() - 1;
+				
 				continue;
-
 			}
 			
 			bytes = cs.readChunk(rec.getRID().chunk, offset, 4);
@@ -343,7 +332,9 @@ public class ClientRec {
 			
 			return FSReturnVals.Success;
 		}
-
-		return FSReturnVals.Fail;	}
+		
+		rec.setRID(null);
+		return FSReturnVals.Fail;
+	}
 
 }
