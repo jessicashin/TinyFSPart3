@@ -120,9 +120,19 @@ public class Master implements MasterInterface
 	}
 	
 	public synchronized boolean ValidFileHandle(FileHandle file) {
+		/*if (files==null){
+			System.out.println("hash is null"+" "+true); 
+		return false; 	
+		}else if (file==null){
+			System.out.println("file is null"+" "+true); 
+		return false;	
+		}*/
+		System.out.println(file.getDirectory()+" "+ file.get()+" "+true);
 		if (files.containsKey(file.get())) {
+			System.out.println(file.get()+" "+true); 
 			return true;
 		}
+		System.out.println(file.get()+" "+false); 
 		return false;
 	}
 	

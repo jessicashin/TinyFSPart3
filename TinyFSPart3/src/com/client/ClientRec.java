@@ -33,7 +33,12 @@ public class ClientRec {
 	public FSReturnVals AppendRecord(FileHandle ofh, byte[] payload,
 			RID RecordID) {
 		// /// use the chunkhandle defined in RID class
+		/*if (ofh==null){
+			System.out.println("filehandle is null!"); 
+			return FSReturnVals.BadHandle;
+		}*/
 		if (!m.ValidFileHandle(ofh)) {
+			System.out.println("filehandle is invalid!"); 
 			return FSReturnVals.BadHandle;
 		}
 		RID recordID = new RID(m.GetFirstChunk(ofh),0);

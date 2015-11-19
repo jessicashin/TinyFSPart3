@@ -33,4 +33,10 @@ public class FileHandle {
 	public String getFilename() {
 		return filename;
 	}
+	public void setDirectory(String dir){
+		this.directory=dir; 
+	}
+	public void setFilename (String  filename){
+		this.filename=filename; 
+	}
 }
