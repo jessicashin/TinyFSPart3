@@ -13,6 +13,7 @@ import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.Set;
 
+import com.client.ClientFS.FSReturnVals;
 import com.client.FileHandle;
 import com.interfaces.MasterInterface;
 
@@ -398,7 +399,32 @@ public class Master implements MasterInterface
 
 	public synchronized int OpenFile(String FilePath, FileHandle ofh)
 	{
-		return 0;
+		int count = FilePath.length() - FilePath.replace("/", "").length();
+		if(count<1) {
+			return BadHandle;
+		} else if(count==1) {
+			ofh.directory="/"; 
+			ofh.filename=FilePath.substring(1, FilePath.length());
+			ofh.handle=FilePath; 
+		} else {
+			int lastSlash=FilePath.lastIndexOf('/'); 
+			//ofh= new FileHandle (FilePath.substring(0, lastSlash), FilePath.substring(lastSlash+1, FilePath.length())); 
+			ofh.directory=FilePath.substring(0, lastSlash); 
+			ofh.filename=FilePath.substring(lastSlash+1, FilePath.length()); 
+//			ofh.setDirectory(FilePath.substring(0, lastSlash));
+//			ofh.setFilename(FilePath.substring(lastSlash+1, FilePath.length()));
+			ofh.handle=FilePath; 
+		}
+		
+		System.out.println(ofh.get()+" "+ofh.getDirectory()+" "+ofh.getFilename());
+		
+//		LinkedList<String> vals = namespace.get(ofh.getDirectory());
+//		if ((vals == null) || (!vals.contains(ofh.getDirectory())))
+//		{
+//			return FileDoesNotExist;
+//		}
+		
+		return Success;
 	}
 
 	public synchronized int CloseFile(FileHandle ofh)

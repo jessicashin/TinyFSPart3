@@ -282,6 +282,19 @@ public class ClientFS {
 	 * Example usage: OpenFile("/Shahram/CSCI485/Lecture1/Intro.pptx")
 	 */
 	public FSReturnVals OpenFile(String FilePath, FileHandle ofh) {
+		try {
+			Client.WriteOutput.writeInt(Master.ReqOpenFile);
+			
+			Client.WriteOutput.writeInt(FilePath.length());
+			Client.WriteOutput.write(FilePath.getBytes());
+			Client.WriteOutput.writeInt(1);
+			Client.WriteOutput.writeObject(ofh);
+			
+			int result = Network.ReadIntFromInputStream("ClientFS", Client.ReadInput);
+			return TranslateMasterRetVal(result);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		return TranslateMasterRetVal(MasterInterface.Fail);
 	}
 
@@ -292,6 +305,25 @@ public class ClientFS {
 	 * Example usage: CloseFile(FH1)
 	 */
 	public FSReturnVals CloseFile(FileHandle ofh) {
+		try {
+			Client.WriteOutput.writeInt(Master.ReqCloseFile);
+			Client.WriteOutput.writeInt(1);
+			Client.WriteOutput.writeObject(ofh);
+			
+//			Client.WriteOutput.writeInt(ofh.getDirectory().length());
+//			Client.WriteOutput.write(ofh.getDirectory().getBytes());
+//			
+//			Client.WriteOutput.writeInt(ofh.getFilename().length());
+//			Client.WriteOutput.write(ofh.getFilename().getBytes());
+//			
+//			Client.WriteOutput.writeInt(ofh.get().length());
+//			Client.WriteOutput.write(ofh.get().getBytes());
+			
+			int result = Network.ReadIntFromInputStream("ClientFS", Client.ReadInput);
+			return TranslateMasterRetVal(result);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		return TranslateMasterRetVal(MasterInterface.Fail);
 	}
 
