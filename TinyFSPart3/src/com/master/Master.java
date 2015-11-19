@@ -182,6 +182,11 @@ public class Master implements MasterInterface
 			return null;
 		}
 		
+		if (chunks.isEmpty())
+		{
+			return null;
+		}
+		
 		return chunks.getFirst();
 	}
 	
@@ -482,7 +487,12 @@ public class Master implements MasterInterface
 
 	public synchronized int CloseFile(String FilePath)
 	{
+		if(files.containsKey(FilePath))
+			return Success;
+		else
+			return FileDoesNotExist;
 //		String FilePath=ofh.get();
+		/*
 		int count = FilePath.length() - FilePath.replace("/", "").length();
 		if(count<1) {
 			return BadHandle;
@@ -494,6 +504,7 @@ public class Master implements MasterInterface
 			else
 				return FileDoesNotExist;
 		}
+		*/
 	}
 	
 	public int AppendRecord(FileHandle ofh, byte[] payload, RID RecordID) {
