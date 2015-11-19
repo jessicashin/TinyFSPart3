@@ -2,7 +2,7 @@ package com.client;
 
 import java.io.Serializable;
 
-public class FileHandle implements Serializable {
+public class FileHandle {
 	public String handle;
 	public String directory; 
 	public String filename; 
