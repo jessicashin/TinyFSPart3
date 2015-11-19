@@ -3,20 +3,13 @@ package com.client;
 import java.io.Serializable;
 
 public class FileHandle implements Serializable {
-	final static String root = "csci485";
-	public String directory;
-	public String filename;
 	public String handle;
 	
 	public FileHandle() {
-		directory = null;
-		filename = null;
 		handle = null;
 	}
 	
 	public FileHandle(String tgtdir, String fn) {
-		directory = tgtdir;
-		filename = fn;
 		if (tgtdir == "/") {
 			handle = tgtdir + fn;
 		} else {
@@ -29,11 +22,13 @@ public class FileHandle implements Serializable {
 	}
 	
 	public String getDirectory() {
-		return directory;
+		int slash = handle.lastIndexOf("/");
+		return handle.substring(0, slash);
 	}
 	
 	public String getFilename() {
-		return filename;
+		int slash = handle.lastIndexOf("/");
+		return handle.substring(slash + 1, handle.length());
 	}
 	public void setDirectory(String dir){
 		this.directory=dir; 

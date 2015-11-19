@@ -78,6 +78,8 @@ public class ClientFS {
 	 * "CSCI485"), CreateDir("/Shahram/CSCI485", "Lecture1")
 	 */
 	public FSReturnVals CreateDir(String src, String dirname) {
+		return TranslateMasterRetVal(Master.get().CreateDir(src, dirname));
+		/*
 		try {
 			Client.WriteOutput.writeInt(Master.ReqCreateDir);
 		
@@ -100,6 +102,7 @@ public class ClientFS {
 		}
 		
 		return TranslateMasterRetVal(MasterInterface.Fail);
+		*/
 	}
 
 	/**
@@ -110,6 +113,8 @@ public class ClientFS {
 	 * Example usage: DeleteDir("/Shahram/CSCI485", "Lecture1")
 	 */
 	public FSReturnVals DeleteDir(String src, String dirname) {
+		return TranslateMasterRetVal(Master.get().DeleteDir(src, dirname));
+		/*
 		try {
 			Client.WriteOutput.writeInt(Master.ReqDeleteDir);
 		
@@ -132,6 +137,7 @@ public class ClientFS {
 		}
 		
 		return TranslateMasterRetVal(MasterInterface.Fail);
+		*/
 	}
 
 	/**
@@ -144,6 +150,8 @@ public class ClientFS {
 	 */
 	//pass to master
 	public FSReturnVals RenameDir(String src, String NewName) {
+		return TranslateMasterRetVal(Master.get().RenameDir(src, NewName));
+		/*
 		try {
 			Client.WriteOutput.writeInt(Master.ReqRenameDir);
 		
@@ -166,6 +174,7 @@ public class ClientFS {
 		}
 		
 		return TranslateMasterRetVal(MasterInterface.Fail);
+		*/
 	}
 
 	/**
@@ -179,6 +188,8 @@ public class ClientFS {
 	 */
 	//pass to master
 	public String[] ListDir(String tgt) {
+		return Master.get().ListDir(tgt);
+		/*
 		try {
 			Client.WriteOutput.writeInt(Master.ReqListDir);
 		
@@ -210,6 +221,7 @@ public class ClientFS {
 		}
 		
 		return null;
+		*/
 	}
 
 	/**
@@ -220,6 +232,8 @@ public class ClientFS {
 	 * Example usage: Createfile("/Shahram/CSCI485/Lecture1", "Intro.pptx")
 	 */
 	public FSReturnVals CreateFile(String tgtdir, String filename) {
+		return TranslateMasterRetVal(Master.get().CreateFile(tgtdir, filename));
+		/*
 		try {
 			Client.WriteOutput.writeInt(Master.ReqCreateFile);
 		
@@ -242,6 +256,7 @@ public class ClientFS {
 		}
 		
 		return TranslateMasterRetVal(MasterInterface.Fail);
+		*/
 	}
 
 	/**
@@ -252,6 +267,8 @@ public class ClientFS {
 	 * Example usage: DeleteFile("/Shahram/CSCI485/Lecture1", "Intro.pptx")
 	 */
 	public FSReturnVals DeleteFile(String tgtdir, String filename) {
+		return TranslateMasterRetVal(Master.get().DeleteFile(tgtdir, filename));
+		/*
 		try {
 			Client.WriteOutput.writeInt(Master.ReqDeleteFile);
 		
@@ -274,6 +291,7 @@ public class ClientFS {
 		}
 		
 		return TranslateMasterRetVal(MasterInterface.Fail);
+		*/
 	}
 
 	/**
@@ -283,6 +301,10 @@ public class ClientFS {
 	 * Example usage: OpenFile("/Shahram/CSCI485/Lecture1/Intro.pptx")
 	 */
 	public FSReturnVals OpenFile(String FilePath, FileHandle ofh) {
+		FSReturnVals retVal = TranslateMasterRetVal(Master.get().OpenFile(FilePath, ofh.get()));
+		ofh.handle = FilePath;
+		return retVal;
+		/*
 		try {
 			Client.WriteOutput.writeInt(Master.ReqOpenFile);
 			
@@ -300,6 +322,7 @@ public class ClientFS {
 			e.printStackTrace();
 		}
 		return TranslateMasterRetVal(MasterInterface.Fail);
+		*/
 	}
 
 	/**
@@ -309,6 +332,8 @@ public class ClientFS {
 	 * Example usage: CloseFile(FH1)
 	 */
 	public FSReturnVals CloseFile(FileHandle ofh) {
+		return TranslateMasterRetVal(Master.get().CloseFile(ofh));
+		/*
 		try {
 			Client.WriteOutput.writeInt(Master.ReqCloseFile);
 			Client.WriteOutput.writeInt(1);
@@ -329,6 +354,7 @@ public class ClientFS {
 			e.printStackTrace();
 		}
 		return TranslateMasterRetVal(MasterInterface.Fail);
+		*/
 	}
 
 }

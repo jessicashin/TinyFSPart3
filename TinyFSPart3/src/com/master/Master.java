@@ -28,6 +28,17 @@ public class Master implements MasterInterface
 	private Hashtable<String, LinkedList<String>> files = new Hashtable<String, LinkedList<String>>();
 	// TODO: Location of each chunk's replicas.
 	
+	static Master instance = null;
+	
+	static public Master get()
+	{
+		if(instance == null)
+		{
+			instance = new Master();
+		}
+		return instance;
+	}
+	
 	public Master()
 	{
 		//ReadMetadata();
@@ -120,14 +131,20 @@ public class Master implements MasterInterface
 		ReadStrHashTable(FileChunksFile, files);
 	}
 	
-	public synchronized boolean ValidFileHandle(FileHandle file) {
+	public synchronized boolean ValidFileHandle(FileHandle file) {		
+		LinkedList<String> vals = namespace.get(file.getDirectory());
 		
-		if (namespace.containsKey(file.getDirectory())) {
-			//System.out.println(file.getDirectory()+" "+file.getFilename()+" "+file.get()+" :validFileHandle: "+true); 
-			return true;
+		if (vals == null)
+		{
+			return false;
 		}
-		//System.out.println(file.getDirectory()+" "+file.getFilename()+" "+file.get()+" :validFileHandle: "+false); 
-		return false;
+		
+		if (!vals.contains(file.getFilename()))
+		{
+			return false;
+		}
+		
+		return true;
 	}
 	
 	public synchronized boolean ValidChunkHandle(FileHandle file, String chunk) {
@@ -436,7 +453,7 @@ public class Master implements MasterInterface
 //			ofh.setDirectory(FilePath.substring(0, lastSlash));
 //			ofh.setFilename(FilePath.substring(lastSlash+1, FilePath.length()));
 //			ofh.handle=FilePath;
-			if(files.containsKey(handle))
+			if(namespace.containsKey(FilePath))
 				return Success;
 			else
 				return FileDoesNotExist;
