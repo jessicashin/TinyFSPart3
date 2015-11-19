@@ -224,9 +224,11 @@ public class MasterThread extends Thread {
 		byte[] bytes = Network.RecvPayload("Master", readInput, length);
 		String FilePath = (new String(bytes)).toString();
 		
-		FileHandle ofh = Network.ReadFileHandleFromInputStream("Master", readInput);
+		length = Network.ReadIntFromInputStream("Master", readInput);
+		bytes = Network.RecvPayload("Master", readInput, length);
+		String handle = (new String(bytes)).toString();
 		
-		int result = master.OpenFile(FilePath, ofh);
+		int result = master.OpenFile(FilePath, handle);
 		
 		try {
 			writeOutput.writeInt(result);

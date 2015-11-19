@@ -40,19 +40,19 @@ public class Network {
 		return PayloadSize;
 	}
 	
-	public static FileHandle ReadFileHandleFromInputStream(String caller, ObjectInputStream instream) {
-		FileHandle fh = new FileHandle();
-		try {
-			if(null==instream.readObject()){System.out.println("YO");}
-			Object obj = instream.readObject();
-			fh = (FileHandle) obj;
-		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return fh;
-	}
+//	public static FileHandle ReadFileHandleFromInputStream(String caller, ObjectInputStream instream) {
+//		FileHandle fh = new FileHandle();
+//		try {
+//			if(null==instream.readObject()){System.out.println("YO");}
+//			Object obj = instream.readObject();
+//			fh = (FileHandle) obj;
+//		} catch (ClassNotFoundException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		return fh;
+//	}
 }

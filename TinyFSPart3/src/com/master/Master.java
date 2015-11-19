@@ -413,26 +413,33 @@ public class Master implements MasterInterface
 		return Success;
 	}
 
-	public synchronized int OpenFile(String FilePath, FileHandle ofh)
+	public synchronized int OpenFile(String FilePath, String handle)
 	{
 		int count = FilePath.length() - FilePath.replace("/", "").length();
 		if(count<1) {
 			return BadHandle;
 		} else if(count==1) {
-			ofh.directory="/"; 
-			ofh.filename=FilePath.substring(1, FilePath.length());
-			ofh.handle=FilePath; 
+//			handle="/";
+//			ofh.directory="/"; 
+//			ofh.filename=FilePath.substring(1, FilePath.length());
+//			ofh.handle=FilePath; 
+			return FileDoesNotExist;
 		} else {
-			int lastSlash=FilePath.lastIndexOf('/'); 
+//			int lastSlash=FilePath.lastIndexOf('/'); 
 			//ofh= new FileHandle (FilePath.substring(0, lastSlash), FilePath.substring(lastSlash+1, FilePath.length())); 
-			ofh.directory=FilePath.substring(0, lastSlash); 
-			ofh.filename=FilePath.substring(lastSlash+1, FilePath.length()); 
+//			handle=FilePath;
+//			ofh.directory=FilePath.substring(0, lastSlash); 
+//			ofh.filename=FilePath.substring(lastSlash+1, FilePath.length()); 
 //			ofh.setDirectory(FilePath.substring(0, lastSlash));
 //			ofh.setFilename(FilePath.substring(lastSlash+1, FilePath.length()));
-			ofh.handle=FilePath; 
+//			ofh.handle=FilePath;
+			if(files.containsKey(handle))
+				return Success;
+			else
+				return FileDoesNotExist;
 		}
-		
-		System.out.println(ofh.get()+" "+ofh.getDirectory()+" "+ofh.getFilename());
+
+//		System.out.println(ofh.get()+" "+ofh.getDirectory()+" "+ofh.getFilename());
 		
 //		LinkedList<String> vals = namespace.get(ofh.getDirectory());
 //		if ((vals == null) || (!vals.contains(ofh.getDirectory())))
@@ -440,7 +447,7 @@ public class Master implements MasterInterface
 //			return FileDoesNotExist;
 //		}
 		
-		return Success;
+//		return Success;
 	}
 
 	public synchronized int CloseFile(FileHandle ofh)

@@ -287,10 +287,13 @@ public class ClientFS {
 			
 			Client.WriteOutput.writeInt(FilePath.length());
 			Client.WriteOutput.write(FilePath.getBytes());
-			Client.WriteOutput.writeInt(1);
-			Client.WriteOutput.writeObject(ofh);
+			Client.WriteOutput.writeInt(ofh.get().length());
+			Client.WriteOutput.write(ofh.get().getBytes());
 			
 			int result = Network.ReadIntFromInputStream("ClientFS", Client.ReadInput);
+			if(result==MasterInterface.Success) {
+				ofh.handle=FilePath;
+			}
 			return TranslateMasterRetVal(result);
 		} catch (IOException e) {
 			e.printStackTrace();
