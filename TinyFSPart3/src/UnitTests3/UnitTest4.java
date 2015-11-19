@@ -25,19 +25,17 @@ public class UnitTest4 {
 		ClientFS cfs = new ClientFS();
 		FSReturnVals fsrv = cfs.CreateDir("/", dir1);
 		if ( fsrv != FSReturnVals.Success ){
-			System.out.println("Unit test 4 result:: fail!");
+			System.out.println("Unit test 4 result: fail!");
     		return;
 		}
 		fsrv = cfs.CreateFile("/" + dir1 + "/", "emp");
 		if( fsrv != FSReturnVals.Success ){
-			System.out.println("Unit test 4 result:::: fail!");
+			System.out.println("Unit test 4 result: fail!");
     		return;
 		}
 		//get the file handle first
 		FileHandle fh = new FileHandle();
 		FSReturnVals ofd = cfs.OpenFile("/" + dir1 + "/emp", fh);
-		fh= new FileHandle("/"+dir1, "emp");
-		System.out.println(fh.get()+"in unit test 4"+fh.getDirectory());
 		byte[] payload = null;
 		int intSize = Integer.SIZE / Byte.SIZE;	// 4 bytes
 		ClientRec crec = new ClientRec();
