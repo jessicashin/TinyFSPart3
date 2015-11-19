@@ -34,7 +34,6 @@ import com.sun.corba.se.impl.orbutil.graph.Graph;
 
 public class ChunkServer implements ChunkServerInterface {
 	final static String filePath = "csci485/";	//or C:\\newfile.txt
-	public final static String ClientConfigFile = "ClientConfig.txt";
 	
 	//Used for the file system
 	public static long counter;
@@ -52,6 +51,13 @@ public class ChunkServer implements ChunkServerInterface {
 	public static final int FALSE = 0;
 	
 	// Chunk Server Location
+	/**
+	 * IP Addresses:
+	 * Andre = 68.181.174.56
+	 * Chris = 68.181.174.86
+	 * Jessica = 68.181.174.114
+	 * Tong = 68.181.174.43
+	 */
 	public static final String ChunkServerIpAddr = "127.0.0.1";
 	public static final int ChunkServerPort = 9643;
 	
@@ -163,18 +169,14 @@ public class ChunkServer implements ChunkServerInterface {
 		ChunkServer cs = new ChunkServer();
 		
 		//Used for communication with the Client via the network
-		int ServerPort = 0; //Set to 0 to cause ServerSocket to allocate the port 
+		//int ServerPort = 0; //Set to 0 to cause ServerSocket to allocate the port 
 		ServerSocket commChanel = null;
 		ObjectOutputStream WriteOutput = null;
 		ObjectInputStream ReadInput = null;
 		
 		try {
 			//Allocate a port and write it to the config file for the Client to consume
-			commChanel = new ServerSocket(ServerPort);
-			ServerPort=commChanel.getLocalPort();
-			PrintWriter outWrite=new PrintWriter(new FileOutputStream(ClientConfigFile));
-			outWrite.println("localhost:"+ServerPort);
-			outWrite.close();
+			commChanel = new ServerSocket(ChunkServerPort);
 		} catch (IOException ex) {
 			System.out.println("Error, failed to open a new socket to listen on.");
 			ex.printStackTrace();
@@ -197,23 +199,24 @@ public class ChunkServer implements ChunkServerInterface {
 					int CMD = Network.ReadIntFromInputStream("ChunkServer", ReadInput);
 					switch (CMD){
 					case CreateChunkCMD:
-						/*
-						String chunkhandle = cs.createChunk();
-						byte[] CHinbytes = chunkhandle.getBytes();
-						WriteOutput.writeInt(ChunkServer.PayloadSZ + CHinbytes.length);
-						WriteOutput.write(CHinbytes);
+						int payloadlength =  Network.ReadIntFromInputStream("ChunkServer", ReadInput);
+						byte[] CHinBytes = Network.RecvPayload("ChunkServer", ReadInput, payloadlength);
+						String ChunkHandle = (new String(CHinBytes)).toString();
+						
+						cs.createChunk(ChunkHandle);
+						
+						WriteOutput.writeInt(ChunkServer.PayloadSZ);
 						WriteOutput.flush();
-						*/
 						break;
 
 					case ReadChunkCMD:
 						int offset =  Network.ReadIntFromInputStream("ChunkServer", ReadInput);
-						int payloadlength =  Network.ReadIntFromInputStream("ChunkServer", ReadInput);
+						payloadlength =  Network.ReadIntFromInputStream("ChunkServer", ReadInput);
 						int chunkhandlesize = payloadsize - ChunkServer.PayloadSZ - ChunkServer.CMDlength - (2 * 4);
 						if (chunkhandlesize < 0)
 							System.out.println("Error in ChunkServer.java, ReadChunkCMD has wrong size.");
-						byte[] CHinBytes = Network.RecvPayload("ChunkServer", ReadInput, chunkhandlesize);
-						String ChunkHandle = (new String(CHinBytes)).toString();
+						CHinBytes = Network.RecvPayload("ChunkServer", ReadInput, chunkhandlesize);
+						ChunkHandle = (new String(CHinBytes)).toString();
 						
 						byte[] res = cs.readChunk(ChunkHandle, offset, payloadlength);
 						
@@ -268,6 +271,7 @@ public class ChunkServer implements ChunkServerInterface {
 
 	public static void main(String args[])
 	{
+		System.out.println("Starting ChunkServer...");
 		ReadAndProcessRequests();
 	}
 }

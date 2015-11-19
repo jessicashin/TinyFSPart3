@@ -19,7 +19,8 @@ public class Network {
 					InputBuff[ReadBytes+j]=tmpbuf[j];
 				}
 			} catch (IOException e) {
-				System.out.println("Error in RecvPayload ("+caller+"), failed to read "+sz+" after reading "+ReadBytes+" bytes.");
+				System.out.println("Connection lost.");
+				//System.out.println("Error in RecvPayload ("+caller+"), failed to read "+sz+" after reading "+ReadBytes+" bytes.");
 				return null;
 			}
 			if (cntr == -1) {

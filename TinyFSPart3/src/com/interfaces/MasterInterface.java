@@ -37,6 +37,13 @@ public interface MasterInterface
 	public static final int ReqGetPreviousChunk	= 113;
 	
 	// Master Location
+	/**
+	 * IP Addresses:
+	 * Andre = 68.181.174.56
+	 * Chris = 68.181.174.86
+	 * Jessica = 68.181.174.114
+	 * Tong = 68.181.174.43
+	 */
 	public static final String MasterIpAddr = "127.0.0.1";
 	public static final int MasterPort = 3469;
 	
